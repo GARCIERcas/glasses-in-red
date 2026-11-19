@@ -53,7 +53,7 @@
       <div id="mActions"><button class="btn ghost" data-act="callMech">${I.phone}Позвонить механику</button></div>
     `);
 
-    const t0 = performance.now(), D = 6500;
+    const t0 = performance.now(), D = C.MECH_MS || 6500;
     const iv = setInterval(() => step(performance.now()), 33);
     function step(now) {
       if (S.view !== 'sos') { clearInterval(iv); return; }
