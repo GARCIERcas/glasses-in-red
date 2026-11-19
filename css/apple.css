@@ -267,5 +267,7 @@ body { font-family: var(--font); letter-spacing: -.01em; }
 .gs.qr-mode .gs-gate { height: 64px; }
 .gs.qr-mode .ts-cab, .gs.qr-mode .ts-lane { height: 62px; }
 .gs.qr-mode .ts-lane { width: 116px; }
-.gs.qr-mode .ts-flap { top: 16px; width: 57px; height: 34px; }
+.gs.qr-mode .ts-flap { top: 18px; width: 57px; height: 32px; }
+.gs.qr-mode .ts-flap.l { border-radius: 0 16px 16px 0; }
+.gs.qr-mode .ts-flap.r { border-radius: 16px 0 0 16px; }
 .gs.qr-mode .ts-cab::after { top: 28px; }
