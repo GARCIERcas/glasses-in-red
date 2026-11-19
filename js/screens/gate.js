@@ -148,7 +148,8 @@
     scene.classList.add('scan');
     $('#gSub').textContent = mode === 'qr' ? 'Держите экран у сканера' : 'Держите телефон у считывателя';
 
-    const at = (ms, fn) => timers.push(setTimeout(fn, ms));
+    const k = (C.GATE_MS || 3300) / 3300; // демо может ускорить проезд шлюза
+    const at = (ms, fn) => timers.push(setTimeout(fn, ms * k));
     at(1100, () => {
       scene.classList.remove('scan');
       scene.classList.add('ok');

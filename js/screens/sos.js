@@ -38,7 +38,6 @@
 
     GIR.mapView.mechShow(from, here);
     S.follow = false;
-    GIR.mapView.fit([from, here]);
 
     GIR.ui.sheet.set(`
       <span class="badge cor">SOS · ${issue.title}</span>
@@ -52,6 +51,8 @@
       <p class="lead" id="mSub">Остановитесь у края коридора и подождите.</p>
       <div id="mActions"><button class="btn ghost" data-act="callMech">${I.phone}Позвонить механику</button></div>
     `);
+    // камеру ставим после смены шторки: отступ снизу считается по её новой высоте
+    requestAnimationFrame(() => { if (S.view === 'sos') GIR.mapView.fit([from, here]); });
 
     const t0 = performance.now(), D = C.MECH_MS || 6500;
     const iv = setInterval(() => step(performance.now()), 33);

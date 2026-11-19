@@ -229,8 +229,21 @@
       ? [90, 70, 60, 450]
       : [80, 30, Math.min(GIR.ui.sheet.height(), innerHeight * 0.62) + 20, 30];
     map.container.fitToViewport();
-    map.setBounds([[s, w], [n, e]], { checkZoomRange: true, zoomMargin: margin, duration: 300 })
-      .then(() => { if (map.getZoom() > 16) map.setZoom(16); });
+    // зум и центр считаем сами и делаем один плавный перелёт: раньше setBounds приближал карту,
+    // а затем резко откатывал зум до 16 — картинка дёргалась (особенно при вызове механика)
+    const [mt, mr, mb, ml] = margin, size = map.container.getSize();
+    const aw = Math.max(40, size[0] - ml - mr), ah = Math.max(40, size[1] - mt - mb);
+    const proj = map.options.get('projection');
+    let z = 16;
+    for (; z > 9; z--) {
+      const a = proj.toGlobalPixels([n, w], z), b = proj.toGlobalPixels([s, e], z);
+      if (b[0] - a[0] <= aw && b[1] - a[1] <= ah) break;
+    }
+    const a = proj.toGlobalPixels([n, w], z), b = proj.toGlobalPixels([s, e], z);
+    // середина рамки встаёт в центр свободной от шторки и кнопок области
+    const cx = (a[0] + b[0]) / 2 - (ml - mr) / 2, cy = (a[1] + b[1]) / 2 - (mt - mb) / 2;
+    lastFollow = '';
+    map.setCenter(proj.fromGlobalPixels([cx, cy], z), z, { duration: 400 });
   }
 
   function fly(ll, z) { map.setCenter(ll, z, { duration: 500 }); }

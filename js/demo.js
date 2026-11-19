@@ -13,7 +13,8 @@
   S.sub = null;
   S.tariff = 'single';
   S.simSpeed = 2;
-  GIR.config.MECH_MS = 3200; // механик доезжает быстрее, чтобы не тянуть кадр
+  GIR.config.MECH_MS = 2000; // механик доезжает быстрее, чтобы не тянуть кадр
+  GIR.config.GATE_MS = 2000; // и шлюз открывается быстрее — весь ролик укладывается примерно в 20 секунд
   if (GIR.settings) GIR.settings.voice = false;
   document.body.classList.add('demo');
 
@@ -86,7 +87,7 @@
   async function moveTo(x, y) {
     const d = Math.hypot(x - pos.x, y - pos.y);
     if (d < 2) return;
-    const ms = Math.round(Math.min(950, 380 + d * 1.1));
+    const ms = Math.round(Math.min(620, 260 + d * 0.8));
     place(x, y, ms);
     await sleep(ms + 60);
   }
@@ -107,11 +108,11 @@
     // целимся чуть левее центра — как живой человек, а не робот
     const x = r.left + Math.min(r.width * 0.42, r.width / 2), y = r.top + r.height * 0.55;
     await moveTo(x, y);
-    await sleep(90);
+    await sleep(60);
     cur.classList.add('down');
     el.classList.add('demo-press');
     touchAt(x, y);
-    await sleep(140);
+    await sleep(120);
     cur.classList.remove('down');
     el.classList.remove('demo-press');
     // список мог перерисоваться под пальцем — нажимаем на актуальный элемент
@@ -123,7 +124,7 @@
     for (const ch of text) {
       input.value += ch;
       input.dispatchEvent(new Event('input', { bubbles: true }));
-      await sleep(85 + Math.random() * 60);
+      await sleep(55 + Math.random() * 35);
     }
   }
 
@@ -131,14 +132,23 @@
   /** Пока идёт анимация (маршрут, поездка) — курсор отъезжает в сторону, чтобы не закрывать кадр. */
   const park = () => moveTo(innerWidth * 0.8, innerHeight * 0.36);
 
+  /** Проехать до отметки km примерно за sec секунд, какой бы длины ни был маршрут. */
+  async function rideTo(km, sec) {
+    const R = S.ride;
+    const left = Math.max(0, km - R.km);
+    S.simSpeed = Math.max(2, Math.ceil(left / (GIR.config.SIM_ROAD_KMPS * sec)));
+    await waitFor(() => !S.ride || S.ride.km >= km - 1e-6 || S.view !== 'ride', 30000);
+    S.simSpeed = 2;
+  }
+
   async function scenario() {
     await waitFor(() => S.view === 'home' && $('.search-btn'));
     GIR.ui.sheet.refresh();
     cur.classList.remove('off');
-    await sleep(900);
+    await sleep(400);
 
     // 1. Поиск: «Куда поедем?» → набираем «Парк Г» → выбираем Парк Горького
-    await tap('.search-btn', 450);
+    await tap('.search-btn', 250);
     const q = await waitFor(() => $('#q'));
     q.blur(); // без клавиатуры на телефоне
     const qr = q.getBoundingClientRect();
@@ -146,40 +156,43 @@
     await type(q, 'Парк Г');
     // ждём, пока подгрузятся адреса, чтобы список не прыгнул в момент нажатия
     await waitFor(() => !$('#results .searching'), 6000).catch(() => {});
-    await sleep(600);
+    await sleep(250);
     await tap('#results [data-arg="gorky"]');
 
     // 2. Маршрут прорисовывается по красным коридорам
     park();
     await waitFor(() => S.view === 'route' && S.route && $('#payBtn'));
-    await sleep(1700);
+    await sleep(1200);
 
-    // 3. Тариф: ползунок на подписку и обратно, оплата 90 ₽
+    // 3. Тариф: показываем подписку и сразу оплачиваем разовый въезд 90 ₽
     if ($('#tariffSeg')) {
-      await tap('#tariffSeg [data-arg="sub"]', 650);
-      await tap('#tariffSeg [data-arg="single"]', 550);
+      await tap('#tariffSeg [data-arg="sub"]', 350);
+      await tap('#tariffSeg [data-arg="single"]', 250);
     }
-    await tap('#payBtn', 300);
+    await tap('#payBtn', 200);
     park();
     if (S.route.none) { await waitFor(() => S.view === 'ride'); return finishRide(); }
 
-    // 4. Едем к шлюзу, на шлюзе — QR-билет и стеклянный турникет
+    // 4. Быстро едем к шлюзу, на шлюзе — QR-билет и стеклянный турникет
+    await waitFor(() => (S.view === 'ride' || S.view === 'gate') && S.ride);
+    if (S.view === 'ride' && S.route.corridor) rideTo(S.route.corridor.startKm, 1.5);
     await waitFor(() => S.view === 'gate' && $('#gBtn'), 60000);
-    await sleep(1500);
-    await tap('#gBtn', 300);
+    S.simSpeed = 2;
+    await sleep(700);
+    await tap('#gBtn', 200);
     park();
 
     // 5. Поездка по коридору
     await waitFor(() => S.view === 'ride' && S.ride.gateIn);
-    await sleep(2600);
+    await sleep(1300);
 
     // 6. SOS: прокол → механик едет из ближайшего хаба → починили
-    await tap('[data-act="sos"]', 700);
+    await tap('[data-act="sos"]', 400);
     await tap('[data-act="sosSend"][data-arg="tire"]', 200);
     park();
     await waitFor(() => $('[data-act="sosDone"]'), 15000);
-    await sleep(900);
-    await tap('[data-act="sosDone"]', 200);
+    await sleep(500);
+    await tap('[data-act="sosDone"]', 150);
     park();
 
     return finishRide();
@@ -188,12 +201,12 @@
   async function finishRide() {
     // 7. Немного едем и «перематываем» до финиша
     await waitFor(() => S.view === 'ride');
-    await sleep(1600);
-    S.simSpeed = 10;
-    await waitFor(() => S.view === 'finish', 120000);
+    await sleep(500);
+    rideTo(S.route.totalKm, 2);
+    await waitFor(() => S.view === 'finish', 60000);
     S.simSpeed = 2;
-    await sleep(1100);
-    await tap('#stars [data-arg="5"]', 1600);
+    await sleep(700);
+    await tap('#stars [data-arg="5"]', 1000);
     cur.classList.add('off');
     overlay('Ещё раз', 'Сценарий закончился. Нажмите, чтобы повторить.', () => location.reload());
   }
@@ -213,7 +226,7 @@
   }
 
   overlay('Начать демо', 'Включите запись экрана, затем нажмите — сценарий пройдёт сам.', async () => {
-    await sleep(1200); // чистое начало для монтажа
+    await sleep(400); // чистое начало для монтажа
     try { await scenario(); } catch (e) { console.warn(e); }
   });
 })();
