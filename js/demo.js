@@ -14,9 +14,26 @@
   S.tariff = 'single';
   S.simSpeed = 2;
   GIR.config.MECH_MS = 2000; // механик доезжает быстрее, чтобы не тянуть кадр
+  GIR.config.PAY_MS = 1200; // и оплата
   GIR.config.GATE_MS = 2000; // и шлюз открывается быстрее — весь ролик укладывается примерно в 20 секунд
   if (GIR.settings) GIR.settings.voice = false;
   document.body.classList.add('demo');
+
+  /* ---------- без ожидания сети: ролик не должен стоять на загрузке ---------- */
+  // «Парк Горького» есть в локальном списке — адреса из интернета в демо не нужны (и список не прыгает)
+  if (GIR.geocoder) GIR.geocoder.search = async () => [];
+  // маршруты по улицам запоминаем и строим заранее, пока на экране кнопка «Начать демо»
+  const roadCache = new Map(), road0 = GIR.roads.road;
+  GIR.roads.road = (a, b) => {
+    const k = a.map((v) => v.toFixed(5)) + '|' + b.map((v) => v.toFixed(5));
+    if (!roadCache.has(k)) roadCache.set(k, road0(a, b).then((r) => { if (!r.ok) roadCache.delete(k); return r; }));
+    return roadCache.get(k);
+  };
+  function prewarm() {
+    const to = GIR.data.places.find((p) => p.id === 'gorky');
+    const from = S.from || (GIR.location.place && GIR.location.place());
+    if (to && from && from.ll) GIR.planner.build(from, to).catch(() => {});
+  }
 
   const style = document.createElement('style');
   style.textContent = `
@@ -154,8 +171,6 @@
     const qr = q.getBoundingClientRect();
     moveTo(qr.left + qr.width * 0.75, qr.bottom + 34); // курсор отходит от поля, пока «печатаем»
     await type(q, 'Парк Г');
-    // ждём, пока подгрузятся адреса, чтобы список не прыгнул в момент нажатия
-    await waitFor(() => !$('#results .searching'), 6000).catch(() => {});
     await sleep(250);
     await tap('#results [data-arg="gorky"]');
 
@@ -225,6 +240,7 @@
     document.body.appendChild(o);
   }
 
+  waitFor(() => S.view === 'home' && GIR.data.places, 30000).then(prewarm, () => {});
   overlay('Начать демо', 'Включите запись экрана, затем нажмите — сценарий пройдёт сам.', async () => {
     await sleep(400); // чистое начало для монтажа
     try { await scenario(); } catch (e) { console.warn(e); }

@@ -7,11 +7,12 @@
     if (paying) return; // двойное нажатие на «Оплатить»
     paying = true;
     GIR.ui.modal.open(`<div class="center"><div class="spinner"></div><h2 class="title">Оплата ${amount} ₽</h2><p class="lead">${title}</p></div>`);
+    const k = (C.PAY_MS || 2200) / 2200; // демо может ускорить оплату
     setTimeout(() => {
       if (!$('#modal').classList.contains('show')) { paying = false; GIR.ui.toast('Оплата отменена'); return; }
       $('#modal').innerHTML = `<div class="center"><div class="done-ico">${I.check}</div><h2 class="title">Оплачено</h2><p class="lead">${title}</p></div>`;
-      setTimeout(() => { paying = false; GIR.ui.closeAll(); onDone(); }, 900);
-    }, 1300);
+      setTimeout(() => { paying = false; GIR.ui.closeAll(); onDone(); }, 900 * k);
+    }, 1300 * k);
   }
 
   function activateSub() {
