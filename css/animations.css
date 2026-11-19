@@ -1,0 +1,105 @@
+/* Анимации интерфейса — единые кривые и тайминги.
+   --ease   — плавное замедление (как системные переходы iOS);
+   --spring — лёгкая пружина без «прыгучести».
+   Всё отключается, если в системе включено «уменьшить движение». */
+
+:root {
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --spring: cubic-bezier(.32, 1.25, .6, 1);
+  --t-fast: .18s;
+  --t: .34s;
+  --t-slow: .46s;
+}
+
+@keyframes screenIn { from { opacity: 0; transform: translateY(8px); } }
+@keyframes riseSm { from { opacity: 0; transform: translateY(5px); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } }
+@keyframes softPop { from { opacity: 0; transform: scale(.86); } }
+@keyframes markerIn { from { opacity: 0; transform: scale(.5); } }
+@keyframes navIn { from { opacity: 0; transform: translateY(-10px) scale(.98); } }
+@keyframes bump { 0% { transform: scale(.7); opacity: .4; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, .45); } 100% { box-shadow: 0 0 0 9px rgba(52, 199, 89, 0); } }
+@keyframes fall {
+  0% { opacity: 1; transform: translate3d(0, -20px, 0) rotate(0); }
+  100% { opacity: 0; transform: translate3d(var(--dx), 70vh, 0) rotate(var(--r)); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---------- смена экрана в шторке: короткая лесенка ---------- */
+  .fade-in > * { animation: screenIn var(--t) var(--ease) both; }
+  .fade-in > *:nth-child(2) { animation-delay: .025s; }
+  .fade-in > *:nth-child(3) { animation-delay: .05s; }
+  .fade-in > *:nth-child(4) { animation-delay: .075s; }
+  .fade-in > *:nth-child(5) { animation-delay: .1s; }
+  .fade-in > *:nth-child(n+6) { animation-delay: .12s; }
+
+  /* категории появляются мягко, без перескока */
+  .cats .cat { animation: softPop var(--t) var(--ease) both; }
+  .cats .cat:nth-child(2) { animation-delay: .02s; } .cats .cat:nth-child(3) { animation-delay: .04s; }
+  .cats .cat:nth-child(4) { animation-delay: .06s; } .cats .cat:nth-child(5) { animation-delay: .08s; }
+  .cats .cat:nth-child(6) { animation-delay: .1s; }  .cats .cat:nth-child(7) { animation-delay: .12s; }
+  .cats .cat:nth-child(8) { animation-delay: .14s; }
+
+  /* списки результатов */
+  #results .item, .stagger > * { animation: riseSm .28s var(--ease) both; }
+  #results .item:nth-child(2), .stagger > *:nth-child(2) { animation-delay: .02s; }
+  #results .item:nth-child(3), .stagger > *:nth-child(3) { animation-delay: .04s; }
+  #results .item:nth-child(4), .stagger > *:nth-child(4) { animation-delay: .06s; }
+  #results .item:nth-child(n+5), .stagger > *:nth-child(n+5) { animation-delay: .08s; }
+
+  /* ---------- шторка, меню, окна ---------- */
+  .sheet { transition: transform var(--t-slow) var(--ease); }
+  .map-btns, .legend { transition: bottom var(--t-slow) var(--ease), opacity .2s; }
+  .drawer { transition: transform .4s var(--ease); }
+  .drawer.show .dhead, .drawer.show .mgroup { animation: slideIn .38s var(--ease) both; }
+  .drawer.show .mgroup:nth-of-type(2) { animation-delay: .03s; }
+  .drawer.show .mgroup:nth-of-type(3) { animation-delay: .06s; }
+  .drawer.show .mgroup:nth-of-type(4) { animation-delay: .09s; }
+  .drawer.show .mgroup:nth-of-type(5) { animation-delay: .12s; }
+
+  .overlay { transition: opacity .28s var(--ease); }
+  .modal { transform: translate(-50%, -50%) scale(.94); transition: opacity .22s var(--ease), transform .4s var(--spring); }
+  .modal.show { transform: translate(-50%, -50%) scale(1); }
+
+  /* ---------- нажатия: вдавливание и мягкий возврат ---------- */
+  .item, .cat-ico, .chip, .saved-item, .hero, .sub-card, .status-card, .promo, .mi, .act, .tariff,
+  .search-btn, .search-map, .round-btn, .issue, .btn, .ctrl, .zoom-btns button {
+    transition: transform .3s var(--spring), background-color .2s, border-color .2s, box-shadow .25s, color .2s;
+  }
+  .item:active, .chip:active, .saved-item:active, .hero:active, .sub-card:active, .status-card:active,
+  .promo:active, .mi:active, .act:active, .search-btn:active, .search-map:active, .round-btn:active,
+  .issue:active, .btn:active, .ctrl:active {
+    transform: scale(.97); transition-duration: .12s;
+  }
+  .cat:active .cat-ico { transform: scale(.92); transition-duration: .12s; }
+  .cat:hover .cat-ico { transform: translateY(-2px); }
+
+  /* ---------- карта ---------- */
+  .mk-anchor > .mk-gate.big, .mk-anchor > .mk-pin, .mk-anchor > .mk-poi, .mk-anchor > .mk-mech { animation: markerIn .42s var(--spring) both; }
+  .map-label { animation: riseSm .3s .15s var(--ease) both; }
+  .picker > :not(.picker-shadow) { transition: transform .26s var(--spring); }
+
+  /* ---------- навигация ---------- */
+  #nav:not([hidden]) { animation: navIn .38s var(--ease); }
+  .nav { transition: width .3s var(--ease), border-radius .3s var(--ease), background-color .3s; }
+  .nav-ico { transition: background-color .3s; }
+  .nav-ico.bump svg { animation: bump .32s var(--ease); }
+  .status-dot { animation: dotPulse 2.4s infinite; }
+  .tl-pos { transition: left .1s linear; }
+
+  /* уведомление */
+  .toast { transition: opacity .25s var(--ease), transform .4s var(--spring); }
+}
+
+/* конфетти по прибытии */
+.confetti { position: fixed; inset: 0; z-index: 80; pointer-events: none; overflow: hidden; }
+.confetti i {
+  position: absolute; top: 18vh; left: var(--x); width: 8px; height: 14px; border-radius: 2px;
+  background: var(--c); animation: fall 1.8s var(--d) cubic-bezier(.2, .6, .4, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .confetti { display: none; }
+}

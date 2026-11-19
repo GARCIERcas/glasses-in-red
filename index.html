@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Glasses in Red</title>
+  <meta name="description" content="Сеть платных велокоридоров Москвы: маршрут, оплата, шлюз, навигация и SOS-механик в одном приложении.">
+  <meta name="theme-color" content="#E4002B">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/map.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/apple.css">
+</head>
+<body>
+  <div id="map" aria-label="Карта"></div>
+
+  <header class="topbar">
+    <button class="round-btn" data-act="menu" aria-label="Меню">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+    <div class="brand">
+      <span class="brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7" cy="13" r="3.5"/><circle cx="17" cy="13" r="3.5"/><path d="M10.5 13h3M3.5 13 2 10M20.5 13 22 10"/></svg></span>
+      Glasses in Red
+    </div>
+    <div class="status" id="netStatus"></div>
+  </header>
+
+  <!-- Баннер навигации: красный — в коридоре, синий — на дороге -->
+  <div class="nav road" id="nav" hidden>
+    <div class="nav-mode" id="navMode"></div>
+    <div class="nav-main">
+      <div class="nav-ico" id="navIco"></div>
+      <div class="nav-txt">
+        <div class="nav-dist" id="navDist"></div>
+        <div class="nav-instr" id="navInstr"></div>
+        <div class="nav-street" id="navStreet"></div>
+      </div>
+    </div>
+    <div class="nav-then" id="navThen"></div>
+  </div>
+
+  <div class="map-btns" id="mapBtns">
+    <div class="zoom-btns">
+      <button data-act="zoomIn" aria-label="Приблизить">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button data-act="zoomOut" aria-label="Отдалить">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+      </button>
+    </div>
+    <button class="round-btn" data-act="legend" aria-label="Легенда карты">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+    </button>
+    <button class="round-btn" data-act="locate" aria-label="Где я">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="legend" id="legend" hidden>
+    <b>Что на карте</b>
+    <div class="legend-row"><span><i class="sw sw-cor"></i></span>Красный коридор — без машин</div>
+    <div class="legend-row"><span><i class="sw sw-road"></i></span>Дорога — обычные улицы</div>
+    <div class="legend-row"><span><i class="sw sw-done"></i></span>Уже проехали</div>
+    <div class="legend-row"><span><i class="mk-gate"></i></span>Шлюз: въезд и выезд</div>
+    <div class="legend-row"><span><i class="mk-hub sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 6.4-6.4M14.7 6.3 13 4.6a4 4 0 0 0-5.6 5.6L9 11.8l-6 6L6 21l6-6"/></svg></i></span>SOS-хаб с механиком</div>
+  </div>
+
+  <!-- Велосипедист в режиме слежения: стоит на месте, карта едет под ним -->
+  <div class="rider-fixed" id="riderFixed" hidden aria-hidden="true">
+    <div class="mk-rider"><div class="mk-rider-arrow"><svg viewBox="0 0 24 24"><path d="M12 2.5 19.5 21 12 16.8 4.5 21z" fill="#fff"/></svg></div></div>
+  </div>
+
+  <!-- Булавка выбора точки на карте -->
+  <div class="picker" id="picker" hidden aria-hidden="true">
+    <div class="picker-bubble" id="pickerLabel">Сюда</div>
+    <div class="picker-head"><i></i></div>
+    <div class="picker-stick"></div>
+    <div class="picker-shadow"></div>
+  </div>
+
+  <section class="sheet" id="sheet">
+    <div class="grab-zone" aria-label="Потяните, чтобы раскрыть"><div class="grab"></div></div>
+    <div id="sheetBody"></div>
+  </section>
+
+  <div class="overlay" id="overlay" data-act="closeAll"></div>
+  <aside class="drawer" id="drawer"></aside>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <!-- генератор QR-кодов для разового билета -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- ядро (Яндекс Карты подгружаются из js/map/map.js) -->
+  <script src="js/config.js"></script>
+  <script src="js/data/network.js"></script>
+  <script src="js/data/corridors.js"></script>
+  <script src="js/data/categories.js"></script>
+  <script src="js/utils/geo.js"></script>
+  <script src="js/utils/format.js"></script>
+  <script src="js/utils/dom.js"></script>
+  <script src="js/services/location.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui/icons.js"></script>
+
+  <!-- сервисы -->
+  <script src="js/services/roads.js"></script>
+  <script src="js/services/network.js"></script>
+  <script src="js/services/planner.js"></script>
+  <script src="js/services/geocoder.js"></script>
+
+  <!-- интерфейс -->
+  <script src="js/ui/overlays.js"></script>
+  <script src="js/map/map.js"></script>
+  <script src="js/screens/home.js"></script>
+  <script src="js/screens/search.js"></script>
+  <script src="js/screens/route.js"></script>
+  <script src="js/screens/payment.js"></script>
+  <script src="js/screens/gate.js"></script>
+  <script src="js/screens/ride.js"></script>
+  <script src="js/screens/sos.js"></script>
+  <script src="js/screens/finish.js"></script>
+  <script src="js/screens/menu.js"></script>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

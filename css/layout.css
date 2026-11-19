@@ -1,0 +1,89 @@
+/* Каркас: карта, верхняя панель, шторка, кнопки карты */
+#map { position: fixed; inset: 0; z-index: 0; background: var(--map-bg); }
+
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; gap: 8px;
+  padding: calc(12px + env(safe-area-inset-top)) 12px 0;
+  pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+
+.round-btn {
+  width: 44px; height: 44px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 50%; background: var(--surface); box-shadow: var(--shadow);
+}
+.round-btn svg { width: 22px; height: 22px; }
+
+.brand {
+  display: flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 14px 0 6px;
+  border-radius: 22px; background: var(--surface); box-shadow: var(--shadow);
+  font-weight: 700; font-size: 15px; letter-spacing: -.01em;
+}
+.brand-logo { width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; }
+.brand-logo svg { width: 20px; height: 20px; }
+
+.status {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 12px; border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow);
+  font-size: 13px; font-weight: 500; white-space: nowrap;
+}
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+@media (max-width: 420px) { .status { display: none; } }
+
+.map-btns {
+  position: fixed; right: 12px; z-index: 15;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: bottom .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* шторка */
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  max-height: 64vh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+  background: var(--surface); border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: 0 -4px 30px rgba(15, 17, 20, .16);
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+  scrollbar-width: none;
+}
+.sheet::-webkit-scrollbar { display: none; }
+.sheet.collapsed { transform: translateY(calc(100% - 64px)); }
+.grab { width: 36px; height: 4px; border-radius: 4px; background: var(--knob); margin: 2px auto 12px; }
+.fade-in { animation: fadeUp .25s ease; }
+@keyframes fadeUp { from { transform: translateY(6px); } }
+
+@media (min-width: 820px) {
+  .topbar { padding: 16px 16px 0; }
+  .sheet {
+    left: 16px; right: auto; bottom: 16px; width: 410px;
+    max-height: calc(100vh - 92px);
+    border-radius: var(--r-lg); padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .grab { display: none; }
+  .sheet.collapsed { transform: none; }
+}
+
+/* ---------- ручка шторки и раскрытие ---------- */
+.grab-zone { margin: -8px -16px 4px; padding: 8px 0 10px; cursor: grab; touch-action: none; }
+.grab-zone .grab { margin: 0 auto; }
+.sheet.expandable { max-height: 88vh; }
+.sheet.is-full { box-shadow: 0 -10px 40px rgba(15, 17, 20, .25); }
+.map-btns.away { opacity: 0; pointer-events: none; }
+.map-btns { transition: bottom .3s cubic-bezier(.2, .8, .2, 1), opacity .2s; }
+@media (min-width: 820px) {
+  .grab-zone { display: none; }
+  .sheet.expandable { max-height: calc(100vh - 92px); }
+}
+
+/* кнопки масштаба: одна вертикальная «таблетка» с + и − */
+.zoom-btns { display: flex; flex-direction: column; width: 44px; border-radius: 22px; background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.zoom-btns button { height: 44px; display: grid; place-items: center; color: var(--ink); }
+.zoom-btns button + button { border-top: 1px solid var(--line); }
+.zoom-btns button:hover { background: var(--hover-soft); }
+.zoom-btns button:active { background: var(--hover); }
+.zoom-btns svg { width: 20px; height: 20px; }

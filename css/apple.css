@@ -1,0 +1,269 @@
+/* Редизайн в духе Apple (iOS 26 · Liquid Glass):
+   парящие полупрозрачные панели с размытием, системный шрифт SF на устройствах Apple,
+   сгруппированные списки как в «Настройках», кнопки-капсулы, сегменты и переключатели iOS.
+   Красный — фирменный «tint»-цвет приложения. Подключён последним в index.html. */
+
+:root {
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Golos Text', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  --ink: #1C1C1E;            /* label */
+  --ink-2: #3C3C43;          /* secondaryLabel без прозрачности */
+  --muted: #8E8E93;          /* systemGray */
+  --line: rgba(60, 60, 67, .14);
+  --soft: rgba(118, 118, 128, .12);   /* fill — поле поиска, сегменты */
+  --surface: #FFFFFF;
+  --surface-2: #F2F2F7;      /* systemGroupedBackground */
+  --hover: rgba(118, 118, 128, .2);
+  --hover-soft: rgba(118, 118, 128, .08);
+  --red: #E4002B;
+  --red-700: #C20025;
+  --ok: #34C759;
+  --ok-50: rgba(52, 199, 89, .14);
+  --road: #007AFF;
+  --contrast: #1C1C1E;
+
+  --glass: rgba(255, 255, 255, .72);
+  --glass-strong: rgba(255, 255, 255, .86);
+  --glass-edge: rgba(255, 255, 255, .7);
+  --glass-blur: blur(26px) saturate(1.9);
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 0 0 .5px rgba(255, 255, 255, .5), 0 12px 40px rgba(0, 0, 0, .14);
+  --shadow: 0 12px 40px rgba(0, 0, 0, .14);
+}
+
+body { font-family: var(--font); letter-spacing: -.01em; }
+.title { font-weight: 700; letter-spacing: -.02em; font-size: 24px; }
+.lead { color: var(--muted); }
+
+/* ---------- «стекло»: кнопки на карте, шторка, баннер, окна ---------- */
+.round-btn, .brand, .status, .zoom-btns, .legend {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: .5px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+.round-btn { width: 46px; height: 46px; }
+.brand { height: 46px; border-radius: 23px; font-weight: 600; letter-spacing: -.02em; }
+.status { color: var(--ink-2); font-weight: 500; }
+.zoom-btns { width: 46px; border-radius: 23px; }
+.zoom-btns button { height: 46px; }
+.zoom-btns button + button { border-top: .5px solid var(--line); }
+
+/* шторка парит над картой, как лист в iOS */
+.sheet {
+  left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom));
+  border-radius: 34px;
+  padding: 8px 18px 18px;
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: .5px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+.grab { width: 36px; height: 5px; border-radius: 3px; background: rgba(60, 60, 67, .3); }
+.grab-zone { margin: -8px -18px 6px; padding: 7px 0 9px; }
+@media (min-width: 820px) {
+  .sheet { left: 16px; bottom: 16px; border-radius: 34px; padding: 20px; }
+}
+
+/* ---------- кнопки-капсулы ---------- */
+.btn { min-height: 52px; border-radius: 999px; font-weight: 600; font-size: 17px; letter-spacing: -.02em; }
+.btn.primary, .btn.primary.road { background: var(--red); color: #fff; box-shadow: none; }
+.btn.primary:hover { background: var(--red-700); }
+.btn.dark { background: var(--ink); }
+.btn.ghost { background: var(--soft); color: var(--red); }
+.link-btn { color: var(--red); font-weight: 500; }
+.back { color: var(--red); font-weight: 500; }
+
+/* ---------- поиск как в iOS ---------- */
+.search-btn { height: 48px; border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 17px; font-weight: 400; padding: 0 16px; }
+.search-btn svg { color: var(--muted); width: 19px; height: 19px; }
+.search-map { width: 48px; height: 48px; border-radius: 50%; background: var(--soft); color: var(--red); }
+.sbox { height: 44px; border-radius: 12px; background: var(--soft); }
+.sbox:focus-within { background: var(--soft); box-shadow: none; }
+.sbar-back { color: var(--red); }
+.from-row { border: 0; background: var(--surface); border-radius: 12px; }
+.chip { border: 0; background: var(--soft); border-radius: 999px; }
+.chip svg { color: var(--red); }
+
+/* ---------- мои места: «виджеты» ---------- */
+.saved { gap: 8px; margin-top: 12px; }
+.saved-item { border: 0; background: var(--surface); border-radius: 18px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06); padding: 10px; }
+.saved-ico { border-radius: 50%; }
+
+/* ---------- категории: иконки-«приложения» ---------- */
+.cats { gap: 16px 6px; margin-top: 18px; }
+.cat { font-size: 11px; font-weight: 500; color: var(--ink); gap: 7px; }
+.cat-ico {
+  width: 58px; height: 58px; border-radius: 15px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 82%, #fff) 0%, var(--c) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 4px 10px rgba(0, 0, 0, .1);
+}
+.cat-ico svg { width: 26px; height: 26px; }
+
+/* ---------- сгруппированные списки как в «Настройках» ---------- */
+.block-title { margin: 24px 4px 7px; font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: uppercase; color: var(--muted); }
+.card-list, .mgroup-card, .legs {
+  background: var(--surface); border: 0; border-radius: 14px; box-shadow: none; padding: 0 0 0 14px;
+}
+.card-list .item, .mgroup-card .mi { border-bottom: 0; padding: 10px 14px 10px 0; position: relative; }
+.card-list .item + .item::before {
+  content: ""; position: absolute; top: 0; left: 46px; right: 0; height: .5px; background: var(--line);
+}
+.mi + .mi::before { left: 46px; height: .5px; }
+.item-ico, .mi-ico { width: 30px; height: 30px; border-radius: 8px; }
+.item-ico svg, .mi-ico svg { width: 17px; height: 17px; }
+.item b, .mi-txt b { font-size: 17px; font-weight: 400; letter-spacing: -.02em; }
+.item span, .mi-txt span { font-size: 13px; }
+.item-meta { font-size: 15px !important; color: var(--muted); }
+.mi > svg { color: rgba(60, 60, 67, .3); }
+
+/* ---------- карточки главного ---------- */
+.hero {
+  margin-top: 20px; border: 0; border-radius: 20px; padding: 14px;
+  background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+}
+.hero-ico { border-radius: 50%; background: var(--red); }
+.hero-txt span { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-txt b { font-size: 17px; font-weight: 600; }
+.hero-go { background: var(--red); color: #fff; border-radius: 999px; padding: 8px 10px 8px 14px; }
+.sub-card, .status-card, .promo, .home-more .month {
+  border: 0; background: var(--surface); border-radius: 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+}
+.sub-ico { border-radius: 50%; background: var(--ink); }
+.sub-card.on .sub-ico { background: var(--ok); }
+.status-dot { background: var(--ok); }
+.promo svg { color: var(--c); }
+.month b { font-weight: 700; letter-spacing: -.03em; }
+
+/* ---------- маршрут ---------- */
+.sum b { font-size: 34px; font-weight: 700; letter-spacing: -.035em; }
+/* сегменты iOS */
+.seg { background: var(--soft); border-radius: 10px; padding: 2px; gap: 0; }
+.seg button { border-radius: 8px; padding: 8px 6px; }
+.seg button.on { background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04); }
+.paymethod em { color: var(--red); }
+
+/* ---------- поездка ---------- */
+.ride-left b, .ride-eta b { font-weight: 700; letter-spacing: -.035em; }
+.act { border-radius: 20px; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .06); font-weight: 500; }
+.act svg { color: var(--red); }
+.act-sos { background: var(--red); box-shadow: none; }
+.ctrl { background: var(--soft); border-radius: 999px; }
+.ctrl.on { background: var(--red); color: #fff; }
+
+/* баннер навигации — тёмное стекло, как в Картах Apple */
+.nav, .nav.corridor, .nav.road {
+  background: rgba(28, 28, 30, .82);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+  backdrop-filter: blur(26px) saturate(1.6);
+  border: .5px solid rgba(255, 255, 255, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 14px 40px rgba(0, 0, 0, .3);
+  border-radius: 24px;
+}
+.nav.compact { border-radius: 18px; }
+.nav.corridor .nav-ico { background: var(--red); }
+.nav.road .nav-ico { background: var(--road); }
+.nav.corridor .nav-mode::before { background: #FF4D6A; }
+.nav.road .nav-mode::before { background: #5AA2FF; }
+.nav-ico { border-radius: 14px; }
+.nav-dist { font-weight: 700; letter-spacing: -.035em; }
+.nav-then { background: rgba(255, 255, 255, .06); }
+.nav.paused { background: rgba(72, 72, 74, .88) !important; }
+
+/* ---------- меню: как «Настройки» ---------- */
+.drawer { background: var(--surface-2); }
+.dhead { background: var(--surface); color: var(--ink); box-shadow: none; border-radius: 14px; }
+.dhead-ava { background: linear-gradient(180deg, #FF4D6A, var(--red)); }
+.dhead-top b { font-size: 20px; font-weight: 600; }
+.dhead-top span { color: var(--muted); }
+.dhead-stats div { background: var(--surface-2); border-radius: 10px; }
+.dhead-stats span { color: var(--muted); }
+.mgroup-title { margin: 0 16px 6px; font-size: 13px; font-weight: 400; letter-spacing: 0; }
+.mgroup-card { padding-left: 14px; }
+.mi { padding-left: 0; }
+
+/* ---------- окна, уведомления, переключатели ---------- */
+.overlay { background: rgba(0, 0, 0, .25); }
+.modal {
+  border-radius: 30px; padding: 24px 20px 20px;
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: .5px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+.modal-close { background: var(--soft); }
+.toast {
+  background: rgba(28, 28, 30, .82);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border-radius: 999px; padding: 12px 18px; font-weight: 500;
+}
+.switch { width: 51px; height: 31px; border-radius: 16px; background: rgba(120, 120, 128, .16); }
+.switch::after { top: 2px; left: 2px; width: 27px; height: 27px; box-shadow: 0 3px 8px rgba(0, 0, 0, .15), 0 3px 1px rgba(0, 0, 0, .06); }
+.switch-row input:checked + .switch { background: var(--ok); }
+.switch-row input:checked + .switch::after { transform: translateX(20px); }
+.badge.ok { background: var(--ok-50); color: #1E8E3E; }
+
+/* ---------- выбор точки и место «я здесь» ---------- */
+.pick-addr { background: var(--surface); border-radius: 16px; }
+.mk-me { background: #007AFF; }
+.mk-me::after { background: rgba(0, 122, 255, .2); }
+
+/* ---------- переключатель тарифа: ползунок плавно съезжает (как сегменты iOS) ---------- */
+.seg-slide { position: relative; }
+.seg-slide .seg-thumb {
+  position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px);
+  border-radius: 8px; background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04);
+  transition: transform .32s cubic-bezier(.3, .9, .3, 1);
+}
+.seg-slide.right .seg-thumb { transform: translateX(100%); }
+.seg-slide button { position: relative; z-index: 1; background: none !important; box-shadow: none !important; transition: color .2s; }
+.seg-slide button:active { transform: none; }
+.seg-slide button span { transition: color .2s; }
+
+/* ---------- шлюз: QR-билет для разового въезда ---------- */
+.gate-mode { margin: 0 auto 14px; max-width: 280px; }
+.gate-mode.locked { opacity: .5; pointer-events: none; }
+.gs.qr-mode .gs-reader { display: none; }
+.gs:not(.qr-mode) .qr-card { display: none; }
+
+.qr-card { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 auto 16px; }
+.qr-box {
+  position: relative; width: 196px; height: 196px; padding: 12px; border-radius: 22px; overflow: hidden;
+  background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .08);
+}
+.qr-box #qrCode, .qr-box #qrCode img, .qr-box #qrCode canvas { display: block; width: 172px !important; height: 172px !important; }
+.qr-fallback { width: 172px; height: 172px; display: grid; place-items: center; font: 700 22px var(--font); letter-spacing: .06em; }
+/* «проявление» нового кода */
+.qr-box.gen #qrCode { animation: qrGen .5s var(--ease, ease) both; }
+@keyframes qrGen { from { opacity: 0; filter: blur(6px); transform: scale(.96); } }
+/* линия сканера бегает по коду */
+.qr-scan {
+  position: absolute; left: 10px; right: 10px; top: 12px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  box-shadow: 0 0 12px rgba(228, 0, 43, .45);
+  animation: qrScan 2.4s ease-in-out infinite;
+}
+@keyframes qrScan { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(168px); } }
+.gs.scan .qr-scan { animation-duration: .7s; }
+/* код принят: зелёная подложка и галочка */
+.qr-ok { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(52, 199, 89, .92); opacity: 0; transform: scale(1.05); transition: opacity .3s, transform .4s var(--spring, ease); }
+.qr-ok svg { width: 64px; height: 64px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
+.gs.ok .qr-ok { opacity: 1; transform: scale(1); }
+.gs.ok .qr-ok svg { animation: gsCheck .4s .15s ease-out forwards; }
+.gs.ok .qr-scan { display: none; }
+
+.qr-meta { display: flex; flex-direction: column; align-items: center; }
+.qr-meta b { font-size: 17px; font-weight: 600; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.qr-meta span { font-size: 13px; color: var(--muted); }
+.qr-timer { width: 160px; height: 4px; border-radius: 2px; background: var(--soft); overflow: hidden; }
+.qr-timer i { display: block; height: 100%; width: 100%; background: var(--red); border-radius: 2px; }
+.qr-hint { font-size: 12px; color: var(--muted); }
+.qr-hint b { font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.gs.ok .qr-timer, .gs.ok .qr-hint { opacity: 0; transition: opacity .2s; }
+.gs.qr-mode .gs-gate { height: 60px; }
+.gs.qr-mode .gs-post { height: 56px; }
+.gs.qr-mode .gs-bollards { height: 44px; }
+.gs.qr-mode .gs-bollards i { height: 40px; }

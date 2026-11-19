@@ -1,0 +1,64 @@
+/* Токены, сброс, типографика */
+:root {
+  --red: #E4002B;
+  --red-700: #B30022;
+  --red-50: #FDECEF;
+  --road: #1D5BEA;
+  --road-50: #E9F0FE;
+  --ink: #15171A;
+  --ink-2: #3B3F45;
+  --muted: #6E737B;
+  --line: #E5E7EB;
+  --soft: #F2F3F5;
+  --bg: #FFFFFF;
+  --ok: #138A47;
+  --ok-50: #E6F4EC;
+  --warn: #8A5A00;
+  --warn-50: #FFF3D9;
+
+  /* поверхности и состояния */
+  --surface: #FFFFFF;        /* шторка, карточки, кнопки на карте, окна */
+  --surface-2: #F4F5F7;      /* фон бокового меню */
+  --hover: #E9EAED;          /* наведение на серые кнопки */
+  --hover-soft: #F7F7F8;     /* наведение на строки списков */
+  --border-strong: #C9CCD2;
+  --knob: #D4D6DB;           /* ручка шторки, выключенный переключатель, шевроны */
+  --contrast: #15171A;       /* тёмная заливка (кнопка «Маршрут», уведомление) */
+  --on-contrast: #FFFFFF;
+  --map-bg: #E8E9EC;
+
+  --shadow: 0 8px 28px rgba(15, 17, 20, .14), 0 1px 3px rgba(15, 17, 20, .08);
+  --r-lg: 20px;
+  --r-md: 14px;
+  --r-sm: 10px;
+  --font: 'Golos Text', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--map-bg);
+  color: var(--ink);
+  font: 400 15px/1.4 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; text-align: left; }
+button:disabled { cursor: default; opacity: .45; }
+input { font: inherit; color: inherit; }
+svg { display: block; }
+
+.title { font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.2; margin: 0 0 6px; }
+.lead { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+.section-title { font-size: 13px; font-weight: 600; color: var(--muted); margin: 18px 0 8px; }
+.center { text-align: center; }
+.red { color: var(--red) !important; }
+
+b, strong { font-weight: 600; }
+.ride-stats b, .save-value, .save-side b, .cmp-row b, .t-price, .nav-dist, .fact b, .plan-price, .mech-eta b {
+  font-variant-numeric: tabular-nums;
+}
