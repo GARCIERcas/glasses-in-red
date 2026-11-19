@@ -263,7 +263,9 @@ body { font-family: var(--font); letter-spacing: -.01em; }
 .qr-hint { font-size: 12px; color: var(--muted); }
 .qr-hint b { font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .gs.ok .qr-timer, .gs.ok .qr-hint { opacity: 0; transition: opacity .2s; }
-.gs.qr-mode .gs-gate { height: 60px; }
-.gs.qr-mode .gs-post { height: 56px; }
-.gs.qr-mode .gs-bollards { height: 44px; }
-.gs.qr-mode .gs-bollards i { height: 40px; }
+/* под QR-кодом турникет компактнее, чтобы кнопка помещалась */
+.gs.qr-mode .gs-gate { height: 64px; }
+.gs.qr-mode .ts-cab, .gs.qr-mode .ts-lane { height: 62px; }
+.gs.qr-mode .ts-lane { width: 116px; }
+.gs.qr-mode .ts-flap { top: 16px; width: 57px; height: 34px; }
+.gs.qr-mode .ts-cab::after { top: 28px; }

@@ -138,15 +138,45 @@ body.riding .topbar .brand, body.riding .topbar .status { display: none; }
 .gs-check { position: absolute; width: 44px; height: 44px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
 .gs-burst { position: absolute; inset: 22px; border-radius: 50%; border: 3px solid var(--ok); opacity: 0; }
 
-.gs-gate { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: center; gap: 14px; height: 74px; }
-.gs-post { position: relative; width: 12px; height: 70px; border-radius: 6px 6px 0 0; background: var(--contrast); }
-.gs-lamp { position: absolute; top: 6px; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 3px var(--surface); transition: background .3s; }
-.gs-bollards { display: flex; align-items: flex-end; gap: 16px; height: 56px; padding: 0 6px; overflow: hidden; }
-.gs-bollards i {
-  width: 14px; height: 50px; border-radius: 7px 7px 0 0; border: 2px solid var(--ink); border-bottom: 0;
-  background: repeating-linear-gradient(180deg, var(--red) 0 10px, #fff 10px 16px);
-  transform-origin: bottom; transition: transform .7s cubic-bezier(.5, -0.3, .3, 1.3);
+/* стеклянный турникет как в метро: две тумбы и стеклянные створки между ними */
+.gs-gate { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: center; height: 86px; }
+.ts-cab {
+  position: relative; z-index: 2; width: 30px; height: 82px; border-radius: 10px 10px 3px 3px;
+  background: linear-gradient(90deg, #C8CCD2, #F3F4F6 42%, #DDE0E4 70%, #BFC4CA);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07), 0 2px 6px rgba(0, 0, 0, .08);
 }
+/* светодиодная полоса на внутренней стороне тумбы */
+.ts-cab::after {
+  content: ''; position: absolute; top: 30px; bottom: 8px; width: 3px; border-radius: 2px;
+  background: var(--red); box-shadow: 0 0 6px rgba(228, 0, 43, .5); transition: background .3s, box-shadow .3s;
+}
+.ts-cab.l::after { right: 4px; }
+.ts-cab.r::after { left: 4px; }
+.ts-lamp { position: absolute; top: 6px; left: 50%; width: 20px; height: 20px; margin-left: -10px; border-radius: 6px; background: #1C1C1E; display: grid; place-items: center; }
+.ts-lamp svg { position: absolute; width: 14px; height: 14px; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: opacity .25s, transform .35s cubic-bezier(.2, 1.4, .4, 1); }
+.ts-x { stroke: #FF3B4E; }
+.ts-go { stroke: var(--ok); opacity: 0; transform: translateY(5px); }
+.ts-lane { position: relative; width: 126px; height: 82px; perspective: 240px; }
+.ts-flap {
+  position: absolute; top: 20px; width: 62px; height: 46px; overflow: hidden;
+  background: linear-gradient(165deg, rgba(255, 255, 255, .8), rgba(196, 220, 238, .5) 48%, rgba(158, 196, 226, .6));
+  border: 1px solid rgba(110, 155, 195, .55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 6px 14px rgba(30, 60, 90, .12);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  transition: transform .8s cubic-bezier(.3, .9, .25, 1.04), opacity .8s;
+}
+.ts-flap.l { left: 0; border-radius: 0 16px 16px 0; transform-origin: left center; }
+.ts-flap.r { right: 0; border-radius: 16px 0 0 16px; transform-origin: right center; }
+/* красная полоса на стекле */
+.ts-flap::before { content: ''; position: absolute; top: 50%; left: 8px; right: 8px; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--red); opacity: .85; transition: background .3s; }
+/* блик бегает по стеклу */
+.ts-flap::after {
+  content: ''; position: absolute; top: -20%; bottom: -20%; left: -30px; width: 16px; transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .9), transparent);
+  animation: tsSheen 3.4s ease-in-out infinite;
+}
+.ts-flap.r::after { animation-delay: .25s; }
+@keyframes tsSheen { 0%, 55% { left: -30px; } 100% { left: 110%; } }
 .gs-road { height: 4px; margin: 0 -16px; border-radius: 2px; background: var(--contrast); }
 
 /* сканирование */
@@ -160,13 +190,21 @@ body.riding .topbar .brand, body.riding .topbar .status { display: none; }
 .gs.ok .gs-nfc svg { opacity: 0; transform: scale(.5); }
 .gs.ok .gs-check { animation: gsCheck .4s .1s ease-out forwards; }
 .gs.ok .gs-burst { animation: gsBurst .7s ease-out; }
-/* шлюз открыт: сигнал зелёный, болларды по очереди уходят в землю */
-.gs.open .gs-lamp { background: var(--ok); }
-.gs.open .gs-bollards i { transform: scaleY(.06); }
-.gs.open .gs-bollards i:nth-child(2) { transition-delay: .08s; }
-.gs.open .gs-bollards i:nth-child(3) { transition-delay: .16s; }
-.gs.open .gs-bollards i:nth-child(4) { transition-delay: .24s; }
-.gs.open .gs-bollards i:nth-child(5) { transition-delay: .32s; }
+/* проверка: створки чуть вздрагивают */
+.gs.scan .ts-flap.l { animation: tsNudgeL .5s ease-in-out 2; }
+.gs.scan .ts-flap.r { animation: tsNudgeR .5s ease-in-out 2; }
+@keyframes tsNudgeL { 50% { transform: rotateY(8deg); } }
+@keyframes tsNudgeR { 50% { transform: rotateY(-8deg); } }
+/* доступ подтверждён: полоса на стекле зеленеет */
+.gs.ok .ts-flap::before { background: var(--ok); }
+/* турникет открыт: табло со стрелкой, подсветка зелёная, стеклянные створки распахиваются */
+.gs.open .ts-x { opacity: 0; transform: scale(.4); }
+.gs.open .ts-go { opacity: 1; transform: none; }
+.gs.open .ts-cab::after { background: var(--ok); box-shadow: 0 0 10px rgba(52, 199, 89, .7); }
+.gs.open .ts-flap { opacity: .55; }
+.gs.open .ts-flap::after { animation: none; }
+.gs.open .ts-flap.l { transform: rotateY(82deg); }
+.gs.open .ts-flap.r { transform: rotateY(-82deg); transition-delay: .05s; }
 .gate .btn svg { width: 20px; height: 20px; }
 
 @keyframes gsWave { from { transform: scale(.75); opacity: .7; } to { transform: scale(1.15); opacity: 0; } }

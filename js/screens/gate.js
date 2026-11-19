@@ -72,9 +72,9 @@
           </div>` : ''}
 
           <div class="gs-gate">
-            <i class="gs-post"><b class="gs-lamp"></b></i>
-            <div class="gs-bollards"><i></i><i></i><i></i><i></i><i></i></div>
-            <i class="gs-post"><b class="gs-lamp"></b></i>
+            ${cab('l')}
+            <div class="ts-lane"><i class="ts-flap l"></i><i class="ts-flap r"></i></div>
+            ${cab('r')}
           </div>
           <div class="gs-road"></div>
         </div>
@@ -84,6 +84,12 @@
 
     if (single) startQr();
   }
+
+  // тумба стеклянного турникета: табло (красный «стоп» → зелёная стрелка) и светодиодная полоса
+  const cab = (side) => `<div class="ts-cab ${side}"><span class="ts-lamp">
+      <svg class="ts-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
+      <svg class="ts-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+    </span></div>`;
 
   const btnLabel = () => (mode === 'qr' ? `${I.check}Сканер считал код` : `${I.nfc}Приложить телефон`);
 
