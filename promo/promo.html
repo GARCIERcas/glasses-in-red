@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Glasses in Red — промо</title>
+<!--
+  Промо-ролик 20 секунд, 1080×1920. Анимация полностью задаётся функцией render(t), t — секунды.
+  Открыть в браузере: проигрывается сама. Рендер в MP4: node promo/render.js (нужны Playwright и ffmpeg).
+-->
+<style>
+  :root { --red: #E4002B; --ink: #15171A; --muted: #6E737B; --road: #1D5BEA; --ok: #34C759; --soft: #F2F3F5; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #EDEDF0; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden;
+    background: radial-gradient(1200px 900px at 50% 30%, #FFFFFF 0%, #EDEDF0 60%, #E3E3E8 100%); }
+  .abs { position: absolute; }
+
+  /* подписи над телефоном */
+  .cap { position: absolute; left: 0; right: 0; top: 120px; text-align: center; will-change: transform, opacity; }
+  .cap h1 { font-size: 92px; font-weight: 800; letter-spacing: -2.5px; line-height: 1; }
+  .cap h1 em { font-style: normal; color: var(--red); }
+  .cap p { margin-top: 22px; font-size: 38px; font-weight: 500; color: var(--muted); letter-spacing: -.3px; }
+
+  /* телефон */
+  #phone { position: absolute; left: 170px; top: 400px; width: 740px; height: 1480px; border-radius: 104px; background: #0E0F11;
+    box-shadow: 0 60px 120px rgba(20, 20, 30, .28), 0 0 0 3px #2A2C30 inset; will-change: transform, opacity; }
+  #screen { position: absolute; left: 16px; top: 16px; width: 708px; height: 1448px; border-radius: 90px; overflow: hidden; background: #ECEAE4; }
+  #island { position: absolute; left: 50%; top: 22px; width: 220px; height: 64px; margin-left: -110px; border-radius: 40px; background: #000; z-index: 50; }
+  #status { position: absolute; left: 0; right: 0; top: 0; height: 110px; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0 70px 0 84px; font-weight: 700; font-size: 34px; }
+  #status .bat { width: 56px; height: 26px; border: 3px solid var(--ink); border-radius: 8px; position: relative; opacity: .9; }
+  #status .bat::after { content: ''; position: absolute; inset: 3px; right: 10px; background: var(--ink); border-radius: 3px; }
+  svg#map { position: absolute; inset: 0; width: 708px; height: 1448px; }
+
+  /* шторка */
+  #sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 620px; background: rgba(255, 255, 255, .96); border-radius: 56px 56px 0 0;
+    box-shadow: 0 -10px 50px rgba(0, 0, 0, .12); z-index: 20; will-change: height; }
+  #sheet .grab { position: absolute; left: 50%; top: 16px; width: 76px; height: 10px; margin-left: -38px; border-radius: 6px; background: #D5D7DB; }
+  .pane { position: absolute; left: 44px; right: 44px; top: 54px; will-change: transform, opacity; }
+  .title { font-size: 46px; font-weight: 800; letter-spacing: -1px; }
+  .lead { font-size: 28px; color: var(--muted); margin-top: 10px; line-height: 1.35; }
+  .field { margin-top: 26px; height: 92px; border-radius: 26px; background: var(--soft); display: flex; align-items: center; padding: 0 30px; font-size: 32px; font-weight: 500; gap: 18px; }
+  .field .caret { width: 3px; height: 40px; background: var(--red); }
+  .row { display: flex; align-items: center; gap: 24px; padding: 22px 16px; border-radius: 24px; margin-top: 14px; }
+  .row .ico { width: 72px; height: 72px; border-radius: 22px; display: grid; place-items: center; color: #fff; font-size: 34px; font-weight: 800; flex: none; }
+  .row b { display: block; font-size: 32px; font-weight: 700; }
+  .row span { display: block; font-size: 25px; color: var(--muted); margin-top: 4px; }
+  .row em { margin-left: auto; font-style: normal; font-size: 27px; color: var(--muted); font-weight: 600; }
+  .badge { display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 24px; border-radius: 30px; background: rgba(228, 0, 43, .1); color: var(--red); font-size: 26px; font-weight: 700; }
+  .badge i { width: 14px; height: 14px; border-radius: 50%; background: var(--red); }
+  .big { font-size: 96px; font-weight: 800; letter-spacing: -3px; margin-top: 18px; line-height: 1; }
+  .big small { font-size: 40px; font-weight: 700; color: var(--muted); letter-spacing: -1px; margin-left: 10px; }
+  .chips { display: flex; gap: 14px; margin-top: 22px; }
+  .chip { height: 54px; padding: 0 22px; border-radius: 16px; background: var(--soft); display: flex; align-items: center; font-size: 25px; font-weight: 600; }
+  .chip.ok { background: rgba(52, 199, 89, .14); color: #1E8E3E; }
+  .btn { margin-top: 30px; height: 112px; border-radius: 34px; background: var(--red); color: #fff; display: grid; place-items: center; font-size: 36px; font-weight: 700; will-change: transform; }
+  .btn.dark { background: var(--ink); }
+  .seg { margin-top: 24px; height: 84px; border-radius: 24px; background: var(--soft); display: grid; grid-template-columns: 1fr 1fr; padding: 6px; position: relative; font-size: 27px; font-weight: 600; }
+  .seg div { display: grid; place-items: center; position: relative; z-index: 1; }
+  .seg .knob { position: absolute; top: 6px; left: 6px; bottom: 6px; width: calc(50% - 6px); border-radius: 19px; background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, .1); }
+
+  /* шлюз */
+  .gate { margin-top: 26px; height: 250px; border-radius: 32px; background: linear-gradient(#F6F7F9, #ECEEF1); position: relative; overflow: hidden; display: flex; align-items: center; padding: 0 34px; gap: 38px; }
+  .qr { width: 196px; height: 196px; background: #fff; border-radius: 18px; padding: 14px; flex: none; box-shadow: 0 6px 20px rgba(0, 0, 0, .08); }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .posts { position: relative; flex: 1; height: 190px; }
+  .posts .ground { position: absolute; left: 0; right: 0; bottom: 30px; height: 6px; border-radius: 3px; background: #C9CDD3; }
+  .post { position: absolute; bottom: 36px; width: 34px; height: 120px; border-radius: 17px 17px 4px 4px; background: linear-gradient(90deg, #2B2E33, #4A4E55); }
+  .post::before { content: ''; position: absolute; left: 7px; right: 7px; top: 14px; height: 10px; border-radius: 5px; background: var(--red); }
+  .post.go::before { background: var(--ok); }
+  .lamp { position: absolute; right: 0; top: 0; width: 46px; height: 46px; border-radius: 50%; background: var(--red); box-shadow: 0 0 24px rgba(228, 0, 43, .6); }
+  .lamp.go { background: var(--ok); box-shadow: 0 0 28px rgba(52, 199, 89, .7); }
+
+  /* поездка */
+  #nav { position: absolute; left: 26px; right: 26px; top: 120px; height: 190px; border-radius: 44px; background: var(--red); color: #fff; z-index: 30;
+    display: flex; align-items: center; gap: 30px; padding: 0 36px; box-shadow: 0 20px 50px rgba(228, 0, 43, .35); will-change: transform, opacity; }
+  #nav .arr { width: 110px; height: 110px; border-radius: 30px; background: rgba(255, 255, 255, .18); display: grid; place-items: center; flex: none; }
+  #nav b { display: block; font-size: 56px; font-weight: 800; letter-spacing: -1.5px; }
+  #nav span { display: block; font-size: 27px; opacity: .9; margin-top: 4px; }
+  .ride-top { display: flex; justify-content: space-between; align-items: flex-end; }
+  .ride-top div span { display: block; font-size: 25px; color: var(--muted); font-weight: 600; }
+  .ride-top div b { display: block; font-size: 64px; font-weight: 800; letter-spacing: -2px; margin-top: 4px; }
+  .bar { margin-top: 26px; height: 16px; border-radius: 8px; background: var(--soft); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--red); border-radius: 8px; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 28px; }
+  .act { height: 104px; border-radius: 28px; background: var(--soft); display: grid; place-items: center; font-size: 26px; font-weight: 700; }
+  .act.sos { background: var(--ink); color: #fff; font-size: 32px; letter-spacing: 1px; will-change: transform; }
+  .mech { display: flex; align-items: center; gap: 24px; margin-top: 26px; padding: 22px; border-radius: 28px; background: var(--soft); }
+  .ava { width: 84px; height: 84px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 38px; font-weight: 800; flex: none; }
+  .mech b { display: block; font-size: 32px; }
+  .mech span { display: block; font-size: 24px; color: var(--muted); margin-top: 4px; }
+  .mech .eta { margin-left: auto; text-align: right; white-space: nowrap; }
+  .mech .eta b { font-size: 40px; }
+
+  /* касания */
+  .touch { position: absolute; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%; border: 5px solid rgba(228, 0, 43, .8); background: rgba(228, 0, 43, .14); z-index: 60; pointer-events: none; }
+
+  /* заставка и финал */
+  #cover { position: absolute; inset: 0; background: var(--red); color: #fff; z-index: 100; display: grid; place-items: center; text-align: center; will-change: clip-path; }
+  #cover .in { will-change: transform, opacity; }
+  #cover svg { width: 420px; height: 160px; display: block; margin: 0 auto; overflow: visible; }
+  #cover h2 { font-size: 120px; font-weight: 800; letter-spacing: -4px; margin-top: 40px; line-height: 1; }
+  #cover p { font-size: 44px; font-weight: 500; opacity: .9; margin-top: 28px; }
+  #cover .price { display: inline-flex; gap: 18px; margin-top: 60px; }
+  #cover .price span { height: 92px; padding: 0 38px; border-radius: 46px; background: rgba(255, 255, 255, .16); display: flex; align-items: center; font-size: 38px; font-weight: 700; }
+  #cover .url { margin-top: 70px; font-size: 46px; font-weight: 700; letter-spacing: -.5px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="caps"></div>
+
+  <div id="phone">
+    <div id="screen">
+      <div id="island"></div>
+      <div id="status"><span>9:41</span><span class="bat"></span></div>
+      <svg id="map" viewBox="0 0 708 1448">
+        <g id="cam">
+          <rect x="-2000" y="-2000" width="5000" height="5600" fill="#ECEAE4"/>
+          <g id="blocks"></g>
+          <path id="river" fill="none" stroke="#BCD8F0" stroke-width="54" stroke-linecap="round"
+            d="M-200 1250 C 80 1180 160 1000 330 960 S 600 1010 690 860 S 760 560 1000 470 S 1300 420 1400 300"/>
+          <ellipse cx="250" cy="1110" rx="120" ry="80" fill="#CDE7C3" transform="rotate(-24 250 1110)"/>
+          <ellipse cx="840" cy="250" rx="90" ry="60" fill="#CDE7C3"/>
+          <circle cx="520" cy="700" r="380" fill="none" stroke="#FFFFFF" stroke-width="22"/>
+          <circle cx="520" cy="700" r="380" fill="none" stroke="#F6D88A" stroke-width="12"/>
+          <g id="net"></g>
+          <path id="leg1" fill="none" stroke="#1D5BEA" stroke-width="10" stroke-linecap="round" d="M 740 470 L 700 520 L 660 560"/>
+          <path id="corrCase" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"
+            d="M 660 560 C 600 620 560 640 520 700 S 450 820 430 880 S 400 990 370 1040"/>
+          <path id="corr" fill="none" stroke="#E4002B" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"
+            d="M 660 560 C 600 620 560 640 520 700 S 450 820 430 880 S 400 990 370 1040"/>
+          <path id="leg2" fill="none" stroke="#1D5BEA" stroke-width="10" stroke-linecap="round" d="M 370 1040 L 320 1075 L 270 1100"/>
+          <path id="mechLine" fill="none" stroke="#15171A" stroke-width="5" stroke-dasharray="12 12"/>
+          <g id="gates"></g>
+          <g id="pinA"></g><g id="pinB"></g><g id="hub"></g>
+          <g id="mechM"></g>
+          <g id="rider"></g>
+        </g>
+      </svg>
+
+      <div id="nav">
+        <div class="arr"><svg width="64" height="64" viewBox="0 0 24 24"><path d="M12 3 L19 13 H14 V21 H10 V13 H5 Z" fill="#fff"/></svg></div>
+        <div><b id="navD">400 м</b><span>Красный коридор · Яузская линия</span></div>
+      </div>
+
+      <div id="sheet">
+        <div class="grab"></div>
+
+        <div class="pane" id="pSearch">
+          <div class="title">Куда поедем?</div>
+          <div class="field"><svg width="36" height="36" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#6E737B" stroke-width="2.4"/><path d="M15.5 15.5 L21 21" stroke="#6E737B" stroke-width="2.4" stroke-linecap="round"/></svg><span id="typed"></span><i class="caret" id="caret"></i></div>
+          <div class="row" id="rowGorky"><div class="ico" style="background:#20A464">◆</div><div><b>Парк Горького</b><span>Крымский Вал, 9</span></div><em>3,9 км</em></div>
+          <div class="row" style="opacity:.55"><div class="ico" style="background:#8E8E93">◎</div><div><b>Парк Горького, Пушкинская наб.</b><span>Адрес</span></div><em>4,4 км</em></div>
+        </div>
+
+        <div class="pane" id="pRoute">
+          <span class="badge"><i></i>Через красный коридор</span>
+          <div class="big">17 мин<small>4,1 км</small></div>
+          <div class="chips"><span class="chip ok">−12 мин к улицам</span><span class="chip">0 светофоров</span></div>
+          <div class="seg"><i class="knob" id="knob"></i><div>Разовый · 90 ₽</div><div>Подписка · 1500 ₽</div></div>
+          <div class="btn" id="payBtn">Оплатить 90 ₽</div>
+        </div>
+
+        <div class="pane" id="pGate">
+          <div class="title" id="gTitle">Шлюз «Таганская»</div>
+          <div class="lead" id="gSub">Поднесите QR-билет к сканеру</div>
+          <div class="gate">
+            <div class="qr"><svg id="qr" viewBox="0 0 29 29" shape-rendering="crispEdges"></svg></div>
+            <div class="posts"><i class="lamp" id="lamp"></i><i class="ground"></i>
+              <i class="post" style="left:20px"></i><i class="post" style="left:110px"></i><i class="post" style="left:200px"></i></div>
+          </div>
+          <div class="btn dark" id="gBtn">Открыть шлюз</div>
+        </div>
+
+        <div class="pane" id="pRide">
+          <div class="ride-top">
+            <div><span>Прибытие</span><b>10:02</b></div>
+            <div style="text-align:center"><span>Осталось</span><b id="rMin">14 мин</b></div>
+            <div style="text-align:right"><span>Скорость</span><b>25</b></div>
+          </div>
+          <div class="bar"><i id="rBar"></i></div>
+          <div class="acts"><div class="act">Пауза</div><div class="act">Шаги</div><div class="act sos" id="sosBtn">SOS</div></div>
+        </div>
+
+        <div class="pane" id="pSos">
+          <span class="badge"><i></i>SOS · Прокол колеса</span>
+          <div class="title" style="margin-top:22px" id="mTitle">Механик выехал</div>
+          <div class="mech"><div class="ava">А</div><div><b>Артём</b><span>Хаб «Павелецкая» · 1,2 км</span></div>
+            <div class="eta"><b id="mEta">4 мин</b><span id="mEtaS">в пути</span></div></div>
+          <div class="bar"><i id="mBar" style="background:var(--ink)"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="touch" class="touch"></div>
+
+  <div id="cover"><div class="in" id="coverIn"></div></div>
+</div>
+
+<script>
+/* ---------- помощники ---------- */
+const $ = (id) => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => cl((t - a) / (b - a));
+const eo = (x) => 1 - Math.pow(1 - x, 3);
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const back = (x) => { const c = 1.5; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, k) => a + (b - a) * k;
+/** окно видимости: плавно появляется в a, исчезает к b */
+const win = (t, a, b, f = 0.35) => Math.min(eo(prog(t, a, a + f)), 1 - eo(prog(t, b - f, b)));
+function rng(seed) { return () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646; }
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+
+/* ---------- статичная карта: кварталы, сеть коридоров, метки ---------- */
+(function buildMap() {
+  const r = rng(7), g = $('blocks');
+  for (let x = -600; x < 1700; x += 92) for (let y = -600; y < 2200; y += 78) {
+    if (r() < 0.12) continue;
+    const w = 60 + r() * 22, h = 48 + r() * 20;
+    el('rect', { x: x + r() * 8, y: y + r() * 8, width: w, height: h, rx: 6, fill: r() < 0.5 ? '#E2DFD7' : '#DEDAD1', transform: 'rotate(-14 520 700)' }, g);
+  }
+  // остальные коридоры сети — бледные
+  const lines = [
+    'M 660 560 C 760 640 840 700 980 760', 'M 520 700 C 420 640 300 600 120 560', 'M 520 700 C 540 560 560 420 600 200',
+    'M 430 880 C 560 920 700 980 900 1100', 'M 370 1040 C 360 1180 380 1300 420 1460', 'M 120 560 C 140 400 220 300 300 120'];
+  lines.forEach((d) => el('path', { d, fill: 'none', stroke: '#E4002B', 'stroke-width': 10, 'stroke-linecap': 'round', opacity: 0.35, class: 'netl' }, $('net')));
+  // шлюзы
+  [[660, 560], [520, 700], [430, 880], [370, 1040], [980, 760], [120, 560], [600, 200], [900, 1100], [420, 1460], [300, 120]].forEach(([x, y]) => {
+    const gg = el('g', { transform: `translate(${x} ${y})`, class: 'gate-m' }, $('gates'));
+    el('circle', { r: 13, fill: '#fff', stroke: '#E4002B', 'stroke-width': 6 }, gg);
+  });
+  // QR
+  const q = $('qr'), rq = rng(42);
+  for (let i = 0; i < 29; i++) for (let j = 0; j < 29; j++) {
+    const inF = (a, b) => i >= a && i < a + 7 && j >= b && j < b + 7;
+    if (inF(0, 0) || inF(0, 22) || inF(22, 0)) continue;
+    if (rq() < 0.48) el('rect', { x: i, y: j, width: 1, height: 1, fill: '#15171A' }, q);
+  }
+  [[0, 0], [22, 0], [0, 22]].forEach(([x, y]) => {
+    el('rect', { x: x + 0.5, y: y + 0.5, width: 6, height: 6, fill: 'none', stroke: '#15171A', 'stroke-width': 1 }, q);
+    el('rect', { x: x + 2, y: y + 2, width: 3, height: 3, fill: '#15171A' }, q);
+  });
+})();
+
+function pin(g, color, label) {
+  el('circle', { r: 26, fill: color, stroke: '#fff', 'stroke-width': 8 }, g);
+  if (label) { const t = el('text', { y: 10, 'text-anchor': 'middle', fill: '#fff', 'font-size': 28, 'font-weight': 800, 'font-family': 'Inter' }, g); t.textContent = label; }
+}
+pin($('pinA'), '#15171A', '');
+pin($('pinB'), '#20A464', '◆');
+el('rect', { x: -30, y: -30, width: 60, height: 60, rx: 18, fill: '#15171A', stroke: '#fff', 'stroke-width': 6 }, $('hub'));
+el('text', { y: 11, 'text-anchor': 'middle', fill: '#fff', 'font-size': 32, 'font-weight': 800, 'font-family': 'Inter' }, $('hub')).textContent = '+';
+el('circle', { r: 30, fill: '#15171A', stroke: '#fff', 'stroke-width': 7 }, $('mechM'));
+el('path', { d: 'M -10 8 L 6 -8 M 2 -12 a 7 7 0 1 0 10 10', stroke: '#fff', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' }, $('mechM'));
+// велосипедист
+el('circle', { r: 46, fill: 'rgba(228,0,43,.18)', id: 'halo' }, $('rider'));
+el('circle', { r: 30, fill: '#fff' }, $('rider'));
+el('circle', { r: 22, fill: '#E4002B' }, $('rider'));
+el('path', { d: 'M 0 -12 L 9 8 L 0 3 L -9 8 Z', fill: '#fff', id: 'rArrow' }, $('rider'));
+
+const A = [740, 470], B = [270, 1100], HUB = [610, 980];
+$('pinA').setAttribute('transform', `translate(${A})`);
+$('pinB').setAttribute('transform', `translate(${B})`);
+$('hub').setAttribute('transform', `translate(${HUB})`);
+
+const paths = ['leg1', 'corr', 'corrCase', 'leg2'].reduce((o, id) => { const p = $(id); o[id] = { p, L: p.getTotalLength() }; return o; }, {});
+const netEls = [...document.querySelectorAll('.netl')].map((p) => ({ p, L: p.getTotalLength() }));
+function draw(o, k) { o.p.setAttribute('stroke-dasharray', `${o.L} ${o.L}`); o.p.setAttribute('stroke-dashoffset', o.L * (1 - k)); }
+
+/* положение велосипедиста на маршруте: s от 0 до 1 по коридору, отрицательные — подъезд */
+function riderAt(s) {
+  const c = paths.corr;
+  if (s < 0) { const o = paths.leg1; const pt = o.p.getPointAtLength(o.L * (1 + s)); return [pt.x, pt.y]; }
+  const pt = c.p.getPointAtLength(c.L * s); return [pt.x, pt.y];
+}
+function headingAt(s) { const a = riderAt(Math.max(-1, s - 0.01)), b = riderAt(Math.min(1, s + 0.01)); return Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI + 90; }
+
+/* ---------- подписи ---------- */
+const CAPS = [
+  [2.5, 6.0, 'Красные <em>коридоры</em>', 'через всю Москву — без машин'],
+  [6.0, 9.0, 'Маршрут <em>за секунды</em>', 'через ближайший коридор'],
+  [9.0, 12.0, 'Шлюз <em>по телефону</em>', 'QR-билет — и путь открыт'],
+  [12.0, 15.4, 'Едем <em>без светофоров</em>', 'пошаговая навигация'],
+  [15.4, 18.1, '<em>SOS</em>-механик', 'приедет по коридору бесплатно']
+];
+const capEls = CAPS.map(([a, b, h, p]) => { const d = document.createElement('div'); d.className = 'cap'; d.innerHTML = `<h1>${h}</h1><p>${p}</p>`; $('caps').appendChild(d); return d; });
+
+/* ---------- камера ---------- */
+const SCX = 354;
+const mix = (a, b, k) => ({ x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), s: Math.exp(lerp(Math.log(a.s), Math.log(b.s), k)) });
+
+/* ---------- кадр ---------- */
+const coverIn = $('coverIn');
+const LOGO = `<svg viewBox="0 0 420 160"><g fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round">
+  <circle id="lg1" cx="110" cy="90" r="62"/><circle id="lg2" cx="310" cy="90" r="62"/><path id="lg3" d="M 172 84 Q 210 60 248 84"/></g></svg>`;
+let coverMode = '';
+function setCover(mode) {
+  if (mode === coverMode) return;
+  coverMode = mode;
+  coverIn.innerHTML = mode === 'intro'
+    ? `${LOGO}<h2>Glasses in Red</h2><p>Сеть велокоридоров Москвы</p>`
+    : `${LOGO}<h2>Glasses in Red</h2><div class="price"><span>90 ₽ за въезд</span><span>1500 ₽ в месяц</span></div><div class="url">glasses-in-red.site</div>`;
+}
+
+function render(t) {
+  /* заставка / финал */
+  const intro = t < 9;
+  setCover(intro ? 'intro' : 'outro');
+  let r;
+  if (intro) r = lerp(150, 0, eio(prog(t, 2.0, 2.7)));
+  else r = lerp(0, 150, eio(prog(t, 18.0, 18.7)));
+  $('cover').style.clipPath = `circle(${r}% at 50% ${intro ? 50 : 72}%)`;
+  $('cover').style.display = r <= 0 ? 'none' : '';
+  const t0 = intro ? 0.15 : 18.35;
+  const k = eo(prog(t, t0, t0 + 0.7));
+  coverIn.style.opacity = intro ? Math.min(k, 1 - prog(t, 1.85, 2.2)) : k;
+  coverIn.style.transform = `translateY(${(1 - k) * 60}px) scale(${lerp(0.94, 1, k)})`;
+  const lk = eio(prog(t, t0, t0 + 0.9));
+  ['lg1', 'lg2'].forEach((id) => { const c = document.getElementById(id); c.setAttribute('stroke-dasharray', '390 390'); c.setAttribute('stroke-dashoffset', 390 * (1 - lk)); });
+  const b3 = document.getElementById('lg3'); b3.setAttribute('stroke-dasharray', '90 90'); b3.setAttribute('stroke-dashoffset', 90 * (1 - eo(prog(t, t0 + 0.5, t0 + 0.9))));
+
+  /* телефон въезжает */
+  const pk = back(prog(t, 2.05, 2.95));
+  $('phone').style.transform = `translateY(${(1 - pk) * 520}px)`;
+
+  /* подписи */
+  CAPS.forEach(([a, b], i) => {
+    const v = win(t, a, b, 0.4);
+    const inK = eo(prog(t, a, a + 0.5));
+    capEls[i].style.opacity = v;
+    capEls[i].style.transform = `translateY(${(1 - inK) * 40 - (1 - Math.min(1, (b - t) / 0.4)) * 0}px)`;
+    capEls[i].style.display = v <= 0 ? 'none' : '';
+  });
+
+  /* сеть и маршрут прорисовываются */
+  netEls.forEach((o, i) => draw(o, eio(prog(t, 2.7 + i * 0.18, 3.9 + i * 0.18))));
+  const corrK = Math.max(eio(prog(t, 3.0, 4.0)) * 0.999, 0);
+  const routeK = eio(prog(t, 7.15, 7.9));
+  draw(paths.corr, corrK);
+  draw(paths.corrCase, corrK);
+  paths.corr.p.setAttribute('opacity', lerp(0.35, 1, routeK));
+  paths.corr.p.setAttribute('stroke-width', lerp(10, 14, routeK));
+  paths.corrCase.p.setAttribute('opacity', routeK);
+  draw(paths.leg1, eio(prog(t, 7.0, 7.3)));
+  draw(paths.leg2, eio(prog(t, 7.75, 8.05)));
+  document.querySelectorAll('.gate-m').forEach((g, i) => g.setAttribute('opacity', eo(prog(t, 3.3 + i * 0.08, 3.7 + i * 0.08))));
+  const pinK = back(prog(t, 7.0, 7.45));
+  $('pinB').setAttribute('transform', `translate(${B}) scale(${pinK})`);
+  $('pinA').setAttribute('opacity', t < 9.2 ? 1 : 0);
+  $('pinA').setAttribute('transform', `translate(${A}) scale(${back(prog(t, 2.9, 3.3))})`);
+
+  /* велосипедист */
+  let s;
+  if (t < 9.0) s = -1;
+  else if (t < 9.8) s = lerp(-1, 0, eio(prog(t, 9.0, 9.8)));
+  else if (t < 12.0) s = 0;
+  else if (t < 17.9) s = 0.62; // 12–15.6 считается ниже
+  else s = lerp(0.62, 0.8, eio(prog(t, 17.9, 18.8)));
+  // плавное торможение перед SOS: интеграл скорости, падающей до нуля
+  if (t >= 12.0 && t < 15.6) {
+    const v = 0.62 / (3.6 - 0.3); // скорость так, чтобы с торможением (0.6 с) доехать ровно до 0.62
+    const tt = t - 12.0;
+    s = tt < 3.0 ? v * tt : v * 3.0 + v * (tt - 3.0) - v * Math.pow(tt - 3.0, 2) / (2 * 0.6);
+  }
+  const rp = riderAt(s);
+  const showRider = t > 8.9;
+  const camS0 = currentScale(t);
+  $('rider').setAttribute('transform', `translate(${rp}) rotate(${headingAt(s)}) scale(${(1 / camS0) * 1.25 * back(prog(t, 8.9, 9.3))})`);
+  $('rider').setAttribute('opacity', showRider ? 1 : 0);
+  $('halo').setAttribute('r', 46 + 10 * Math.sin(t * 5));
+
+  /* механик */
+  const mk = eio(prog(t, 16.0, 17.4));
+  const mp = [lerp(HUB[0], rp[0], mk), lerp(HUB[1], rp[1], mk)];
+  const mOn = t > 15.7 && t < 18.1;
+  $('mechM').setAttribute('transform', `translate(${mp}) scale(${(1 / camS0) * 1.2 * back(prog(t, 15.7, 16.1))})`);
+  $('mechM').setAttribute('opacity', mOn ? 1 : 0);
+  $('mechLine').setAttribute('d', `M ${mp} L ${rp}`);
+  $('mechLine').setAttribute('opacity', mOn && mk < 1 ? 1 : 0);
+  $('mechLine').setAttribute('stroke-width', 5 / camS0);
+  $('mechLine').setAttribute('stroke-dasharray', `${12 / camS0} ${12 / camS0}`);
+  $('hub').setAttribute('opacity', eo(prog(t, 15.6, 16.0)) * (1 - prog(t, 17.9, 18.2)));
+  $('hub').setAttribute('transform', `translate(${HUB}) scale(${1 / camS0 * 1.1})`);
+
+  /* камера: плавные переходы между планами, без скачков */
+  const cam = camera(t, rp);
+  $('cam').setAttribute('transform', `translate(${SCX - cam.x * cam.s} ${cam.cy - cam.y * cam.s}) scale(${cam.s})`);
+
+  /* шторка: панели сменяют друг друга */
+  const panes = [['pSearch', 2.4, 7.05], ['pRoute', 7.05, 9.05], ['pGate', 9.05, 12.0], ['pRide', 12.0, 15.55], ['pSos', 15.55, 30]];
+  panes.forEach(([id, a, b]) => {
+    const inK = a < 3 ? 1 : eo(prog(t, a, a + 0.35));
+    const outK = eo(prog(t, b - 0.2, b));
+    const e = $(id);
+    e.style.opacity = Math.min(inK, 1 - outK);
+    e.style.transform = `translateY(${(1 - inK) * 40 + outK * -20}px)`;
+    e.style.display = t < a - 0.01 || t > b ? 'none' : '';
+  });
+  // высота шторки
+  const H = [[0, 620], [7.05, 700], [9.05, 720], [12.0, 440], [15.55, 520]];
+  let h = H[0][1];
+  for (let i = 1; i < H.length; i++) h = lerp(h, H[i][1], eio(prog(t, H[i][0] - 0.1, H[i][0] + 0.35)));
+  $('sheet').style.height = h + 'px';
+
+  /* поиск: печатаем «Парк Горького» */
+  const word = 'Парк Горького';
+  const n = Math.floor(cl((t - 4.4) / 0.11, 0, word.length));
+  $('typed').textContent = word.slice(0, n);
+  $('caret').style.opacity = Math.floor(t * 2.4) % 2 ? 0.2 : 1;
+  const listK = eo(prog(t, 5.3, 5.7));
+  document.querySelectorAll('#pSearch .row').forEach((rw, i) => { rw.style.opacity = listK * (i ? 0.55 : 1); rw.style.transform = `translateY(${(1 - listK) * 20}px)`; });
+  $('rowGorky').style.background = t > 6.45 && t < 7.1 ? 'rgba(228,0,43,.08)' : '';
+
+  /* тариф и оплата */
+  const kn = eio(prog(t, 7.9, 8.15)) - eio(prog(t, 8.35, 8.6));
+  $('knob').style.transform = `translateX(${kn * 100}%)`;
+  $('payBtn').style.transform = `scale(${1 - 0.05 * Math.sin(Math.PI * prog(t, 8.75, 8.95))})`;
+  $('payBtn').textContent = t > 8.85 ? '✓ Оплачено' : 'Оплатить 90 ₽';
+  $('payBtn').style.background = t > 8.85 ? 'var(--ok)' : '';
+
+  /* шлюз */
+  const open = eio(prog(t, 10.7, 11.3));
+  const ok = t > 10.45;
+  document.querySelectorAll('.post').forEach((p) => { p.style.transform = `translateY(${open * 125}px)`; p.classList.toggle('go', ok); });
+  $('lamp').classList.toggle('go', ok);
+  $('gTitle').textContent = ok ? 'Доступ подтверждён' : 'Шлюз «Таганская»';
+  $('gTitle').style.color = ok ? '#1E8E3E' : '';
+  $('gSub').textContent = t > 11.2 ? 'Шлюз открыт — проезжайте' : ok ? 'Разовый въезд · действует 2 часа' : t > 9.95 ? 'Сканируем…' : 'Поднесите QR-билет к сканеру';
+  $('gBtn').style.transform = `scale(${1 - 0.05 * Math.sin(Math.PI * prog(t, 9.75, 9.95))})`;
+  $('gBtn').textContent = t > 11.2 ? 'Проезжаем…' : t > 9.9 ? 'Проверяем…' : 'Открыть шлюз';
+
+  /* поездка */
+  const navK = win(t, 12.0, 15.55, 0.4);
+  $('nav').style.opacity = navK;
+  $('nav').style.transform = `translateY(${(1 - eo(prog(t, 12.0, 12.45))) * -60}px)`;
+  $('nav').style.display = navK <= 0 ? 'none' : '';
+  $('navD').textContent = Math.max(50, Math.round((620 - Math.max(0, s) * 900) / 10) * 10) + ' м';
+  $('rBar').style.width = (cl(s) * 70 + 10) + '%';
+  $('rMin').textContent = Math.max(4, Math.round(14 - cl(s) * 9)) + ' мин';
+  $('sosBtn').style.transform = `scale(${1 - 0.06 * Math.sin(Math.PI * prog(t, 15.15, 15.35))})`;
+
+  /* SOS */
+  $('mBar').style.width = mk * 100 + '%';
+  const arrived = t > 17.4;
+  $('mTitle').textContent = arrived ? 'Механик на месте' : 'Механик выехал';
+  $('mTitle').style.color = arrived ? '#1E8E3E' : '';
+  $('mEta').textContent = arrived ? '✓' : Math.max(1, Math.ceil(4 * (1 - mk))) + ' мин';
+  $('mEtaS').textContent = arrived ? 'чиним' : 'в пути';
+
+  /* касания */
+  const taps = [[6.45, 'rowGorky'], [8.75, 'payBtn'], [9.75, 'gBtn'], [15.15, 'sosBtn']];
+  const tc = $('touch');
+  tc.style.opacity = 0;
+  taps.forEach(([tt, id]) => {
+    const q = prog(t, tt, tt + 0.5);
+    if (q > 0 && q < 1) {
+      const rc = $(id).getBoundingClientRect();
+      const x = rc.left + rc.width * 0.45, y = rc.top + rc.height * 0.55;
+      tc.style.left = x + 'px'; tc.style.top = y + 'px';
+      tc.style.opacity = 1 - q;
+      tc.style.transform = `scale(${lerp(0.4, 1.5, eo(q))})`;
+    }
+  });
+}
+
+/* планы камеры */
+const CAM_NET = { x: 540, y: 820, s: 0.62, cy: 560 };
+const CAM_ROUTE = { x: 505, y: 785, s: 0.92, cy: 460 };
+const CAM_GATE = { x: 680, y: 545, s: 1.9, cy: 520 };
+const CAM_SOS = { x: 560, y: 900, s: 1.25, cy: 560 };
+function camera(t, rp) {
+  const follow = { x: rp[0], y: rp[1], s: 1.75, cy: 680 };
+  let c = CAM_NET;
+  const m = (a, b, k) => Object.assign(mix(a, b, k), { cy: lerp(a.cy, b.cy, k) });
+  c = m(c, CAM_ROUTE, eio(prog(t, 6.9, 7.9)));
+  c = m(c, CAM_GATE, eio(prog(t, 9.0, 9.9)));
+  c = m(c, follow, eio(prog(t, 11.6, 12.5)));
+  c = m(c, CAM_SOS, eio(prog(t, 15.6, 16.4)));
+  c = m(c, follow, eio(prog(t, 17.5, 18.3)));
+  return c;
+}
+function currentScale(t) { return camera(t, [0, 0]).s; }
+
+window.render = render;
+window.DURATION = 20;
+render(0);
+// живой просмотр в браузере (при рендере в MP4 не используется)
+if (!/[?&]render\b/.test(location.search)) {
+  const start = performance.now();
+  const loop = () => { render(((performance.now() - start) / 1000) % 20); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
