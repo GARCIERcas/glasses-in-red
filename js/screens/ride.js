@@ -302,11 +302,21 @@
   function resume() {
     const R = S.ride, c = S.route.corridor;
     if (c && !R.gateIn && R.km >= c.startKm) { GIR.screens.gate.show(); return; }
-    R.paused = false;
-    R.t = performance.now();
-    S.follow = true;
     render();
     run();
+    // сначала камера плавно подлетает к велосипедисту на обычном зуме, потом включаем слежение и едем —
+    // иначе слежение мгновенно перескакивало на новую точку и картинка дёргалась
+    S.follow = false;
+    requestAnimationFrame(() => {
+      if (S.ride !== R) return;
+      mv.follow(mv.riderLL(), C.RIDE_ZOOM);
+      setTimeout(() => {
+        if (S.ride !== R || S.view !== 'ride') return;
+        R.paused = false;
+        R.t = performance.now();
+        S.follow = true;
+      }, 380);
+    });
   }
 
   /** Задержка в пути (ожидание механика) — сдвигает время прибытия. */

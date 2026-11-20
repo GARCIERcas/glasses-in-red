@@ -70,7 +70,8 @@
       $('#mTitle').textContent = 'Механик на месте';
       $('#mSub').textContent = `${name} уже работает: ${issue.job}. Обычно это 5–10 минут.`;
       $('#mActions').innerHTML = '<button class="btn primary" data-act="sosDone">Всё починили — едем дальше</button>';
-      GIR.mapView.setView(here, 17);
+      // плавно возвращаем камеру к велосипедисту — туда же, где она будет держать его в поездке
+      GIR.mapView.follow(here, C.RIDE_ZOOM);
     }
   }
 
