@@ -21,7 +21,7 @@
       <div class="issues">
         ${Object.entries(ISSUES).map(([id, x]) => `<button class="issue" data-act="sosSend" data-arg="${id}">${I[x.ic]}<span>${x.title}</span></button>`).join('')}
       </div>
-      <div class="note warn">Если есть травма или угроза жизни — сразу звоните 112.</div>
+      <div class="note warn">Если есть травма или угроза жизни, сразу звоните 112.</div>
     `);
   }
 
@@ -69,7 +69,7 @@
       GIR.mapView.mechArrived();
       $('#mTitle').textContent = 'Механик на месте';
       $('#mSub').textContent = `${name} уже работает: ${issue.job}. Обычно это 5–10 минут.`;
-      $('#mActions').innerHTML = '<button class="btn primary" data-act="sosDone">Всё починили — едем дальше</button>';
+      $('#mActions').innerHTML = '<button class="btn primary" data-act="sosDone">Всё починили, едем дальше</button>';
       // плавно возвращаем камеру к велосипедисту — туда же, где она будет держать его в поездке
       GIR.mapView.follow(here, C.RIDE_ZOOM);
     }

@@ -100,14 +100,14 @@
       if (mod === 'uturn') mod = 'sharp right'; // разворотов внутри сети нет — это артефакт геометрии
       steps.push({
         km: nk, kind: 'switch', mod,
-        text: `${SHORT[mod]} — на коридор «${L[lout].name}»`,
+        text: `${SHORT[mod]} на коридор «${L[lout].name}»`,
         street: `Развязка у шлюза «${N[gates[i]].n}»`
       });
     }
     steps.push({
       km, kind: 'gate',
       text: `Выезд через шлюз «${N[gates[gates.length - 1]].n}»`,
-      street: 'Дальше — навигация по дорогам'
+      street: 'Дальше по улицам'
     });
 
     return { type: 'corridor', coords, km, nodeKms, gates, lines, steps, min: corMin(km) + C.GATE_MIN };

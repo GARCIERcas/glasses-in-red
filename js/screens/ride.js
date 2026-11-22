@@ -8,7 +8,7 @@
   /* баннер навигации: двойной тап — свернуть в маленький прямоугольник (стрелка + расстояние) и обратно */
   const navEl = document.getElementById('nav');
   navEl.classList.toggle('compact', !!GIR.store.get('navCompact', false));
-  navEl.title = 'Двойной тап — свернуть или развернуть';
+  navEl.title = 'Двойной тап: свернуть или развернуть';
   let lastTap = 0;
   navEl.addEventListener('click', () => {
     const t = performance.now();
@@ -88,7 +88,7 @@
       }
       if (c && R.gateIn && !R.gateOut && R.km >= c.endKm) {
         R.gateOut = true;
-        GIR.ui.toast(`Выезд через шлюз «${net.nodes[c.gates[c.gates.length - 1]].n}». Дальше — по улицам`, 3500);
+        GIR.ui.toast(`Выезд через шлюз «${net.nodes[c.gates[c.gates.length - 1]].n}». Дальше по улицам`, 3500);
       }
       if (R.km >= r.totalKm - 1e-6) {
         R.km = r.totalKm;
@@ -251,13 +251,13 @@
     R.busy = false;
     R.t = performance.now();
     if (!name) {
-      GIR.ui.toast('Ближайший шлюз — и так выезд');
+      GIR.ui.toast('Ближайший шлюз и есть выезд');
       if (btn) btn.disabled = false;
       return;
     }
     setSpeeds();
     mv.drawRoute(S.route);
-    GIR.ui.toast(`Выезжаем через шлюз «${name}», дальше — по улицам`, 3000);
+    GIR.ui.toast(`Выезжаем через шлюз «${name}», дальше по улицам`, 3000);
     render();
   }
 
@@ -286,7 +286,7 @@
   function stopRide() {
     GIR.ui.modal.open(`
       <h2 class="title">Завершить поездку?</h2>
-      <p class="lead">Билет действует ${C.SINGLE_HOURS} часа — в коридор можно вернуться.</p>
+      <p class="lead">Билет действует ${C.SINGLE_HOURS} часа, в коридор можно вернуться.</p>
       <button class="btn primary" data-act="stopConfirm">Завершить</button>
       <div class="btn-row"><button class="btn ghost" data-act="closeAll">Продолжить</button></div>`);
   }

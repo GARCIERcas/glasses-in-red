@@ -28,18 +28,18 @@
         </div>
       </div>
       ${group('Поездки',
-        it('history', I.history, '#3B6FE0', 'Мои поездки', S.trips.length ? 'Последняя — ' + esc(S.trips[0].to) : 'Пока пусто') +
+        it('history', I.history, '#3B6FE0', 'Мои поездки', S.trips.length ? 'Последняя: ' + esc(S.trips[0].to) : 'Пока пусто') +
         it('places', I.home, '#20A464', 'Мои места', 'Дом, учёба'))}
       ${group('Оплата',
         it('openSub', I.crown, '#E4002B', 'Подписка', sub ? 'Активна' : C.PRICE_SUB + ' ₽ в месяц') +
         it('payMethods', I.card, '#6B4CE6', 'Способ оплаты', S.pay === 'sbp' ? 'СБП' : 'Карта •••• 2741') +
         it('invite', I.gift, '#F08A24', 'Пригласить друга', '+3 въезда в подарок'))}
       ${group('Сеть',
-        it('lines', I.map, '#E4002B', 'Состояние коридоров', 'Уборка и шлюзы') +
-        it('corporate', I.city, '#0FA3A3', 'Для компаний', 'Доступ для сотрудников'))}
+        it('lines', I.map, '#E4002B', 'Состояние коридоров', '') +
+        it('corporate', I.city, '#0FA3A3', 'Для компаний', ''))}
       ${group('Ещё',
-        it('settings', I.gear, '#6E737B', 'Настройки', 'Голос и вибрация') +
-        it('support', I.help, '#D0368A', 'Поддержка', 'Ответы на вопросы') +
+        it('settings', I.gear, '#6E737B', 'Настройки', '') +
+        it('support', I.help, '#D0368A', 'Поддержка', '') +
         it('about', I.info, '#4A5060', 'Как это работает', ''))}
     `);
   }
@@ -85,7 +85,7 @@
     GIR.ui.closeAll();
     const code = 'RED-' + C.USER_NAME.toUpperCase().replace(/[^A-ZА-ЯЁ]/g, '').slice(0, 5) + '7';
     GIR.ui.modal.open(`<h2 class="title">Пригласите друга</h2>
-      <p class="lead">Друг получит 3 бесплатных въезда, а вы — ещё 3, когда он прокатится первый раз.</p>
+      <p class="lead">Друг получит 3 бесплатных въезда, а вы ещё 3, когда он прокатится первый раз.</p>
       <div class="promo-code"><b>${code}</b><button class="btn ghost" data-act="copyCode" data-arg="${code}">Скопировать</button></div>
       <button class="btn primary" data-act="shareCode" data-arg="${code}">Поделиться</button>`);
   }
@@ -120,21 +120,21 @@
     GIR.ui.closeAll();
     const q = (t, a) => `<details class="faq"><summary>${t}</summary><p>${a}</p></details>`;
     GIR.ui.modal.open(`<h2 class="title">Поддержка</h2>
-      ${q('Шлюз не открывается', 'Поднесите телефон ближе к считывателю и проверьте, что билет или подписка активны. Если не помогло — напишите нам, откроем удалённо.')}
-      ${q('Что если сломался велосипед?', 'Нажмите SOS в поездке — механик ближайшего хаба приедет по коридору. Это бесплатно.')}
+      ${q('Шлюз не открывается', 'Поднесите телефон ближе к считывателю и проверьте, что билет или подписка активны. Если не помогло, напишите нам: откроем удалённо.')}
+      ${q('Что если сломался велосипед?', 'Нажмите SOS в поездке, и механик ближайшего хаба приедет по коридору. Это бесплатно.')}
       ${q('Как вернуть деньги за въезд?', 'Если вы не проехали через шлюз, деньги вернутся автоматически в течение суток.')}
       ${q('Сколько действует разовый билет?', `${C.SINGLE_HOURS} часа с момента оплаты во всех коридорах.`)}
       <button class="btn primary" data-act="supportChat">Написать в поддержку</button>
-      <p class="hint">Если есть травма или угроза жизни — звоните 112</p>`);
+      <p class="hint">Если есть травма или угроза жизни, звоните 112</p>`);
   }
 
   function about() {
     GIR.ui.closeAll();
     GIR.ui.modal.open(`<h2 class="title">Как это работает</h2>
       <ol class="how">
-        <li><b>Выберите, куда ехать</b><span>Маршрут пройдёт по красным коридорам — без машин и светофоров</span></li>
+        <li><b>Выберите, куда ехать</b><span>Маршрут пройдёт по красным коридорам, без машин и светофоров</span></li>
         <li><b>Приложите телефон к шлюзу</b><span>${C.PRICE_SINGLE} ₽ за въезд или ${C.PRICE_SUB} ₽ в месяц</span></li>
-        <li><b>Что-то сломалось — нажмите SOS</b><span>Механик приедет по коридору</span></li>
+        <li><b>Что-то сломалось? Нажмите SOS</b><span>Механик приедет по коридору</span></li>
       </ol>
       <button class="btn dark" data-act="closeAll">Понятно</button>
       <button class="link-btn" data-act="resetDemo">Сбросить демо-данные</button>`);
@@ -158,11 +158,11 @@
       catch (e) { GIR.ui.toast('Код: ' + code); }
     },
     async shareCode(code) {
-      const text = `Катаюсь по красным коридорам Glasses in Red — без машин и светофоров. Промокод ${code} даёт 3 бесплатных въезда.`;
+      const text = `Катаюсь по красным коридорам Glasses in Red, без машин и светофоров. Промокод ${code} даёт 3 бесплатных въезда.`;
       if (navigator.share) { try { await navigator.share({ text }); } catch (e) { /* отменили */ } }
       else GIR.actions.copyCode(code);
     },
-    corpRequest() { GIR.ui.closeAll(); GIR.ui.toast('Заявка отправлена — менеджер свяжется с вами (демо)'); },
+    corpRequest() { GIR.ui.closeAll(); GIR.ui.toast('Заявка отправлена. Менеджер свяжется с вами (демо)'); },
     supportChat() { GIR.ui.closeAll(); GIR.ui.toast('Чат поддержки откроется в следующей версии (демо)'); }
   });
 })();

@@ -241,7 +241,7 @@
   }
 
   waitFor(() => S.view === 'home' && GIR.data.places, 30000).then(prewarm, () => {});
-  overlay('Начать демо', 'Включите запись экрана, затем нажмите — сценарий пройдёт сам.', async () => {
+  overlay('Начать демо', 'Включите запись экрана и нажмите. Сценарий пройдёт сам.', async () => {
     await sleep(400); // чистое начало для монтажа
     try { await scenario(); } catch (e) { console.warn(e); }
   });

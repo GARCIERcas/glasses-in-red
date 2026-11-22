@@ -108,7 +108,7 @@
     S[S.field] = p;
     if (S.field === 'from') { show('to'); return; }
     if (!S.from) { show('from'); return; }
-    if (GIR.geo.hav(S.from.ll, S.to.ll) < 0.05) { GIR.ui.toast('Вы уже на месте — выберите другую точку'); return; }
+    if (GIR.geo.hav(S.from.ll, S.to.ll) < 0.05) { GIR.ui.toast('Вы уже на месте. Выберите другую точку'); return; }
     GIR.screens.route.show();
   }
 

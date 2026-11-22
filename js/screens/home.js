@@ -80,7 +80,7 @@
         <div class="block-title">Шлюзы рядом</div>
         <div class="list card-list">
           ${near.map((g) => row('nearGate', g.k, N[g.k].hub ? I.wrench : I.gate, N[g.k].hub ? '#4A5060' : '#E4002B',
-            '«' + N[g.k].n + '»', N[g.k].hub ? 'Шлюз и SOS-хаб с механиком' : 'Шлюз', F.km(g.d))).join('')}
+            '«' + N[g.k].n + '»', N[g.k].hub ? 'SOS-хаб с механиком' : '', F.km(g.d))).join('')}
         </div>
 
         <div class="block-title">Сеть сегодня</div>

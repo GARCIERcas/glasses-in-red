@@ -62,7 +62,7 @@
     ` : `
       <h2 class="title">Подписка</h2>
       <div class="plan-price">${C.PRICE_SUB} ₽ <small>в месяц</small></div>
-      <p class="lead">Въезд во все коридоры без доплат. Разовый въезд — ${C.PRICE_SINGLE} ₽, так что подписка окупается с 17-й поездки.</p>
+      <p class="lead">Въезд во все коридоры без доплат. Разовый въезд стоит ${C.PRICE_SINGLE} ₽, подписка окупается с 17-й поездки.</p>
       <button class="btn primary" data-act="buySub">Оформить</button>
       <p class="hint">Демо: деньги не списываются</p>
     `);

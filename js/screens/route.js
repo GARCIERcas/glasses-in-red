@@ -30,7 +30,7 @@
 
     if (r.none) {
       GIR.ui.sheet.set(`${head}
-        <p class="lead">Красных коридоров по пути нет — поведём по обычным улицам.</p>
+        <p class="lead">Красных коридоров по пути нет. Поведём по обычным улицам.</p>
         <button class="btn primary road" data-act="roadOnly">Поехали</button>`);
       return;
     }
@@ -41,7 +41,7 @@
     GIR.ui.sheet.set(`${head}
       ${GIR.ui.timeline(r)}
       <div class="sum-note"><i class="sw sw-cor"></i>${F.km(c.km)} по коридору · «${N[c.gates[0]].n}» → «${N[c.gates[c.gates.length - 1]].n}»</div>
-      ${r.approx ? '<div class="note">Нет связи с сервером маршрутов — улицы показаны примерно.</div>' : ''}
+      ${r.approx ? '<div class="note">Нет связи с сервером маршрутов. Улицы показаны примерно.</div>' : ''}
 
       ${sub ? '' : `
         <div class="seg seg-slide ${S.tariff === 'sub' ? 'right' : ''}" id="tariffSeg"><i class="seg-thumb"></i>
