@@ -3,6 +3,7 @@ deploy/
 *.zip
 
 # локальные настройки инструментов
-.claude/
+.claude/*
+!.claude/skills/
 Thumbs.db
 desktop.ini
